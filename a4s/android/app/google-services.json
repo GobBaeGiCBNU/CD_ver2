@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "67937552375",
+    "firebase_url": "https://alarmforsleep-default-rtdb.firebaseio.com",
+    "project_id": "alarmforsleep",
+    "storage_bucket": "alarmforsleep.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:67937552375:android:89d9409399e0543c7a90f2",
+        "android_client_info": {
+          "package_name": "com.example.a4s"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "67937552375-9uftj5n5olgb0553ghsd3v6ahr56ro44.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCio6m8NWaWUeNFnIegFF85ArW2XqvsX8Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "67937552375-9uftj5n5olgb0553ghsd3v6ahr56ro44.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

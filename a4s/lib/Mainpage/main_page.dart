@@ -1,6 +1,9 @@
+import 'package:a4s/notification.dart';
 import 'package:flutter/material.dart';
 import 'package:a4s/alarm/alarm.dart';
 import 'package:a4s/data/repository/auth_repository.dart';
+import 'package:permission_handler/permission_handler.dart';
+
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -25,10 +28,49 @@ class _Root extends State<MainPage> with SingleTickerProviderStateMixin {
 
   @override
   void initState() {
+    // 초기화
+    FlutterLocalNotification.init();
+
+    // 3초 후 권한 요청
+    Future.delayed(const Duration(seconds: 3),
+        FlutterLocalNotification.requestNotificationPermission());
+
     super.initState();
+
     controller = TabController(length: 3, vsync: this, initialIndex: 1);
     _navigatorKeyList =
         List.generate(_pages.length, (index) => GlobalKey<NavigatorState>());
+
+
+    _requestNotificationPermissions(); // 알림 권한 요청
+  }
+
+  void _requestNotificationPermissions() async {
+    //알림 권한 요청
+    final status = await FlutterLocalNotification().requestNotificationPermissions();
+    if (status.isDenied && context.mounted) {
+      showDialog(
+        // 알림 권한이 거부되었을 경우 다이얼로그 출력
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('알림 권한이 거부되었습니다.'),
+          content: Text('알림을 받으려면 앱 설정에서 권한을 허용해야 합니다.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('설정'), //다이얼로그 버튼의 죄측 텍스트
+              onPressed: () {
+                Navigator.of(context).pop();
+                openAppSettings(); //설정 클릭시 권한설정 화면으로 이동
+              },
+            ),
+            TextButton(
+              child: Text('취소'), //다이얼로그 버튼의 우측 텍스트
+              onPressed: () => Navigator.of(context).pop(), //다이얼로그 닫기
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
@@ -51,7 +93,7 @@ class _Root extends State<MainPage> with SingleTickerProviderStateMixin {
             title: Container(
               height: 80,
               child: Image.asset(
-                "/logo.png",
+                "assets/logo.png",
                 width: 150,
                 height: double.maxFinite,
               ),
@@ -93,7 +135,7 @@ class _Root extends State<MainPage> with SingleTickerProviderStateMixin {
                 textAlign: TextAlign.center,
               ),
               icon: Image.asset(
-                'navbar/therapy.png',
+                'assets/navbar/therapy.png',
                 width: 24,
                 height: 24,
                 color: controller.index == 0 ? Colors.white : Colors.grey,
@@ -102,7 +144,7 @@ class _Root extends State<MainPage> with SingleTickerProviderStateMixin {
             Tab(
               text: '알람',
               icon: Image.asset(
-                'navbar/alarm.png',
+                'assets/navbar/alarm.png',
                 width: 24,
                 height: 24,
                 color: controller.index == 1 ? Colors.white : Colors.grey,
@@ -111,7 +153,7 @@ class _Root extends State<MainPage> with SingleTickerProviderStateMixin {
             Tab(
               text: '내 정보',
               icon: Image.asset(
-                'navbar/user.png',
+                'assets/navbar/user.png',
                 width: 24,
                 height: 24,
                 color: controller.index == 2 ? Colors.white : Colors.grey,

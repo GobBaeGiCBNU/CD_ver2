@@ -4,10 +4,14 @@ import 'package:a4s/MainPage/main_page.dart';
 import 'package:a4s/data/view/user_view_model.dart';
 import 'package:a4s/firebase_options.dart';
 import 'package:a4s/Login/login.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:a4s/notification.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
+
 void main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(

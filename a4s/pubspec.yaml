@@ -46,6 +46,11 @@ dependencies:
   health: ^8.0.0
   permission_handler: ^10.4.5
 
+  # 알람 기능
+  dotted_border: ^2.0.0+3
+  flutter_local_notifications:
+  timezone: ^0.9.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

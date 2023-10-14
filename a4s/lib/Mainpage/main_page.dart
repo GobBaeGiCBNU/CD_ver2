@@ -1,4 +1,5 @@
 import 'package:a4s/notification.dart';
+import 'package:a4s/therapy.dart';
 import 'package:flutter/material.dart';
 import 'package:a4s/alarm/alarm.dart';
 import 'package:a4s/data/repository/auth_repository.dart';
@@ -23,6 +24,7 @@ class _Root extends State<MainPage> with SingleTickerProviderStateMixin {
 
   int _selectedIdx = 1;
   final List _pages = [
+    const TherapyPage(),
     const AlarmPage(),
   ];
 

@@ -3,6 +3,8 @@ import 'package:a4s/model/alarm.dart';
 import 'package:a4s/provider/alarm_state.dart';
 import 'package:a4s/service/alarm_scheduler.dart';
 import 'package:provider/provider.dart';
+import 'package:vibration/vibration.dart';
+import 'dart:async';
 
 class AlarmScreen extends StatefulWidget {
   const AlarmScreen({Key? key, required this.alarm}) : super(key: key);
@@ -14,11 +16,16 @@ class AlarmScreen extends StatefulWidget {
 }
 
 class _AlarmScreenState extends State<AlarmScreen> with WidgetsBindingObserver {
+  Timer? _vibrationTimer;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-
+    // Vibration.vibrate(duration: 60000); //1000 = 1초
+    _vibrationTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      Vibration.vibrate(duration: 1000); // 0.5초 동안 진동
+    });
     // TODO: 음악 재생하기
   }
 
@@ -64,8 +71,12 @@ class _AlarmScreenState extends State<AlarmScreen> with WidgetsBindingObserver {
               style: Theme.of(context).textTheme.headline4,
             ),
             TextButton(
-              onPressed: _dismissAlarm,
+              onPressed:() {
+                _dismissAlarm();
+                _vibrationTimer?.cancel();
+                },
               child: const Text('알람 해제'),
+
             ),
           ],
         ),

@@ -45,6 +45,7 @@ dependencies:
   connectivity_plus: ^4.0.2
   health: ^8.0.0
   permission_handler: ^10.4.5
+  url_launcher: ^6.0.12
 
   # 알람 기능
   dotted_border: ^2.0.0+3

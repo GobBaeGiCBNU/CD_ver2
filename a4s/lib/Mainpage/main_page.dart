@@ -5,6 +5,11 @@ import 'package:a4s/alarm/alarm.dart';
 import 'package:a4s/data/repository/auth_repository.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'package:a4s/model/alarm.dart';
+import 'package:a4s/provider/alarm_list_provider.dart';
+import 'package:a4s/service/alarm_scheduler.dart';
+import 'package:provider/provider.dart';
+
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -24,8 +29,8 @@ class _Root extends State<MainPage> with SingleTickerProviderStateMixin {
 
   int _selectedIdx = 1;
   final List _pages = [
-    const TherapyPage(),
-    const AlarmPage(),
+    TherapyPage(),
+    AlarmPage(),
   ];
 
   @override
@@ -162,6 +167,55 @@ class _Root extends State<MainPage> with SingleTickerProviderStateMixin {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+}
+
+
+class _AlarmCard extends StatelessWidget {
+  const _AlarmCard({
+    Key? key,
+    required this.alarm,
+    required this.onTapSwitch,
+    required this.onTapCard,
+  }) : super(key: key);
+
+  final Alarm alarm;
+  final void Function(bool enabled) onTapSwitch;
+  final VoidCallback onTapCard;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      margin: const EdgeInsets.all(16.0),
+      child: InkWell(
+        onTap: onTapCard,
+        borderRadius: BorderRadius.circular(12.0),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  alarm.timeOfDay.format(context),
+                  style: theme.textTheme.headline6!.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(
+                      alarm.enabled ? 1.0 : 0.4,
+                    ),
+                  ),
+                ),
+              ),
+              Switch(
+                value: alarm.enabled,
+                onChanged: onTapSwitch,
+              ),
+            ],
+          ),
         ),
       ),
     );

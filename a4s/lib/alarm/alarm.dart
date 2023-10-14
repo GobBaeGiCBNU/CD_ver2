@@ -6,6 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+
+import 'package:a4s/model/alarm.dart';
+import 'package:a4s/provider/alarm_list_provider.dart';
+import 'package:a4s/service/alarm_scheduler.dart';
+import 'package:provider/provider.dart' as provider;
+
+
 import '../main.dart';
 
 
@@ -18,139 +25,146 @@ class AlarmPage extends ConsumerStatefulWidget {
 
 class _AlarmPage extends ConsumerState<AlarmPage> {
   int pageNum = 1;
+
   void getPageNum(int index) {
     setState(() {
       pageNum = index;
     });
   }
 
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.blueAccent,
+          onPressed: () {
+            _createAlarm(context, context.read<AlarmListProvider>());
+          },
+          child: const Icon(Icons.add, color: Colors.white,),
+        ),
+        body: Center(
+          child: Column(
+            children: [
+              Expanded(
+                child: provider.Consumer<AlarmListProvider>(
+                  builder: (context, alarmList, child) =>
+                      ListView.builder(
+                        itemCount: alarmList.length,
+                        itemBuilder: (context, index) {
+                          final alarm = alarmList[index];
+                          return _AlarmCard(
+                            alarm: alarm,
+                            onTapSwitch: (enabled) {
+                              _switchAlarm(alarmList, alarm, enabled);
+                            },
+                            onTapCard: () {
+                              _handleCardTap(alarmList, alarm, context);
+                            },
+                          );
+                        },
+                      ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
+
+void _createAlarm(BuildContext context,
+    AlarmListProvider alarmListProvider,) async {
+  final time = await showTimePicker(
+    context: context,
+    initialTime: const TimeOfDay(hour: 8, minute: 30),
+  );
+  if (time == null) return;
+
+  final alarm = Alarm(
+    id: alarmListProvider.getAvailableAlarmId(),
+    hour: time.hour,
+    minute: time.minute,
+    enabled: true,
+  );
+
+  alarmListProvider.add(alarm);
+  await AlarmScheduler.scheduleRepeatable(alarm);
+}
+
+void _switchAlarm(AlarmListProvider alarmListProvider,
+    Alarm alarm,
+    bool enabled,) async {
+  final newAlarm = alarm.copyWith(enabled: enabled);
+  alarmListProvider.replace(
+    alarm,
+    newAlarm,
+  );
+  if (enabled) {
+    await AlarmScheduler.scheduleRepeatable(newAlarm);
+  } else {
+    await AlarmScheduler.cancelRepeatable(newAlarm);
+  }
+}
+
+void _handleCardTap(AlarmListProvider alarmList,
+    Alarm alarm,
+    BuildContext context,) async {
+  final time = await showTimePicker(
+    context: context,
+    initialTime: alarm.timeOfDay,
+  );
+  if (time == null) return;
+
+  final newAlarm = alarm.copyWith(hour: time.hour, minute: time.minute);
+
+  alarmList.replace(alarm, newAlarm);
+  if (alarm.enabled) await AlarmScheduler.cancelRepeatable(alarm);
+  if (newAlarm.enabled) await AlarmScheduler.scheduleRepeatable(newAlarm);
+
+}
+
+class _AlarmCard extends StatelessWidget {
+  const _AlarmCard({
+    Key? key,
+    required this.alarm,
+    required this.onTapSwitch,
+    required this.onTapCard,
+  }) : super(key: key);
+
+  final Alarm alarm;
+  final void Function(bool enabled) onTapSwitch;
+  final VoidCallback onTapCard;
+
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
 
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 32, vertical: 64),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          // Text(
-          //   'Alarm',
-          //   style: TextStyle(
-          //     fontWeight: FontWeight.w700,
-          //     fontSize: 24),
-          // ),
-          Expanded(
-            child: ListView(
-              children: alarms.map<Widget>((alarm) {
-                // 알람 모양
-                return Container(
-                  // 알람끼리 간격
-                  margin: const EdgeInsets.only(bottom: 32),
-                  // box 내부 글씨 padding
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  // box 꾸미기
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: alarm.gradientColors,
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
-                    // boxShadow: [
-                    //   BoxShadow(
-                    //     color: Colors.black12.withOpacity(0.8),
-                    //     blurRadius: 10,
-                    //     spreadRadius: -8,
-                    //     offset: Offset(1, 1)
-                    //   )
-                    // ],
-                    borderRadius: BorderRadius.all(Radius.circular((24)))
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      // 알람 정보 & 활성화 바
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Icon(
-                              Icons.label,
-                              color: Colors.white,
-                              size: 24,
-                              ),
-                            SizedBox(width: 8),
-                            Text('Office', style: TextStyle(color: Colors.white)),
-                          ],
-                        ),
-                        Switch(
-                          onChanged: (bool value){},
-                          value: true,
-                          activeColor: Colors.white,
-                        ),
-                        ]
-                      ),
-                      // 요일
-                      Text('Mon-Fri', style: TextStyle(color: Colors.white)),
-                      // 시간 설정
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Text('07: 00 AM',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w700
-                              )),
-                          Icon(
-                            Icons.keyboard_arrow_down,
-                            size: 36,
-                            color: Colors.white,
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              }).followedBy([
-                // 알람 추가
-                DottedBorder(
-                  strokeWidth: 3,
-                  color: Colors.black12,
-                  borderType: BorderType.RRect,
-                  radius: Radius.circular(24),
-                  dashPattern: [5, 4],
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(24)),
-                    ),
-                    child: TextButton(
-                      onPressed: () => FlutterLocalNotification.showNotification(),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                      ),
-                      child: Column(
-                        children: <Widget>[
-                          Image.asset(
-                            'assets/add_button.png'
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            '알람 추가',
-                            style: TextStyle(
-                              color: CustomColors.a4s
-                            ),
-                          )
-                        ],
-                      ),
+    return Card(
+      margin: const EdgeInsets.all(16.0),
+      child: InkWell(
+        onTap: onTapCard,
+        borderRadius: BorderRadius.circular(12.0),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  alarm.timeOfDay.format(context),
+                  style: theme.textTheme.headline6!.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(
+                      alarm.enabled ? 1.0 : 0.4,
                     ),
                   ),
-                )
-              ]).toList(),
-            ),
+                ),
+              ),
+              Switch(
+                value: alarm.enabled,
+                onChanged: onTapSwitch,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

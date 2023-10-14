@@ -48,6 +48,17 @@ dependencies:
   url_launcher: ^6.0.12
 
   # 알람 기능
+  android_alarm_manager_plus:
+    git:
+      url: https://github.com/jja08111/plus_plugins.git
+      path: packages/android_alarm_manager_plus
+      ref: alarm_app
+
+  provider: ^6.0.3
+  shared_preferences: ^2.0.15
+  path_provider: ^2.0.10
+  json_annotation: ^4.5.0
+
   dotted_border: ^2.0.0+3
   flutter_local_notifications:
   timezone: ^0.9.0

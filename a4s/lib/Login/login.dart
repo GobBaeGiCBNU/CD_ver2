@@ -1,10 +1,13 @@
 import 'package:a4s/Login/signup_4.dart';
+import 'package:a4s/model/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:a4s/login/reset_password.dart';
 import '../MainPage/main_page.dart';
 import '../data/view/user_view_model.dart';
 import './signup.dart';
+import 'package:a4s/alarm/alarm_observer.dart';
+
 
 // 로그인 화면
 class LoginPage extends ConsumerStatefulWidget {
@@ -124,7 +127,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => MainPage()));
+                                    builder: (context) => AlarmObserver(child: MainPage())));
                           } catch (e) {
                             print(e);
                             print("로그인 실패");
@@ -158,7 +161,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => MainPage()));
+                                  builder: (context) => AlarmObserver(child: MainPage())));
                         } catch (e) {
                           print(e);
                           print("로그인 실패");

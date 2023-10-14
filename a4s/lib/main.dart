@@ -74,6 +74,7 @@ class AlarmForSleep extends ConsumerWidget {
               seedColor: const Color.fromARGB(255, 255, 255, 255)),
           useMaterial3: true,
         ),
-        home: autoLogin == true ? const MainPage() : LoginPage());
+        home: autoLogin == true ? AlarmObserver(child: const MainPage()) : AlarmObserver(child: LoginPage())
+    );
   }
 }

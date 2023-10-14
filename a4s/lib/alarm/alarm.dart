@@ -1,76 +1,13 @@
-import 'package:a4s/alarm/data.dart';
 import 'package:a4s/notification.dart';
-import 'package:a4s/theme_data.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-
 import 'package:a4s/model/alarm.dart';
 import 'package:a4s/provider/alarm_list_provider.dart';
 import 'package:a4s/service/alarm_scheduler.dart';
 import 'package:provider/provider.dart' as provider;
-
-
 import '../main.dart';
 
-
-class AlarmPage extends ConsumerStatefulWidget {
-  const AlarmPage({super.key});
-
-  @override
-  _AlarmPage createState() => _AlarmPage();
-}
-
-class _AlarmPage extends ConsumerState<AlarmPage> {
-  int pageNum = 1;
-
-  void getPageNum(int index) {
-    setState(() {
-      pageNum = index;
-    });
-  }
-
-    @override
-    Widget build(BuildContext context) {
-      return Scaffold(
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: Colors.blueAccent,
-          onPressed: () {
-            _createAlarm(context, context.read<AlarmListProvider>());
-          },
-          child: const Icon(Icons.add, color: Colors.white,),
-        ),
-        body: Center(
-          child: Column(
-            children: [
-              Expanded(
-                child: provider.Consumer<AlarmListProvider>(
-                  builder: (context, alarmList, child) =>
-                      ListView.builder(
-                        itemCount: alarmList.length,
-                        itemBuilder: (context, index) {
-                          final alarm = alarmList[index];
-                          return _AlarmCard(
-                            alarm: alarm,
-                            onTapSwitch: (enabled) {
-                              _switchAlarm(alarmList, alarm, enabled);
-                            },
-                            onTapCard: () {
-                              _handleCardTap(alarmList, alarm, context);
-                            },
-                          );
-                        },
-                      ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-  }
 
 void _createAlarm(BuildContext context,
     AlarmListProvider alarmListProvider,) async {
@@ -89,6 +26,13 @@ void _createAlarm(BuildContext context,
 
   alarmListProvider.add(alarm);
   await AlarmScheduler.scheduleRepeatable(alarm);
+}
+
+void _deleteAlarm(AlarmListProvider alarmListProvider,
+    Alarm alarm) async {
+
+  alarmListProvider.remove(alarm);
+
 }
 
 void _switchAlarm(AlarmListProvider alarmListProvider,
@@ -123,17 +67,82 @@ void _handleCardTap(AlarmListProvider alarmList,
 
 }
 
+
+
+class AlarmPage extends ConsumerStatefulWidget {
+  const AlarmPage({super.key});
+
+  @override
+  _AlarmPage createState() => _AlarmPage();
+}
+
+class _AlarmPage extends ConsumerState<AlarmPage> {
+  int pageNum = 1;
+
+  void getPageNum(int index) {
+    setState(() {
+      pageNum = index;
+    });
+  }
+
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.blueAccent,
+          onPressed: () {
+            _createAlarm(context, context.read<AlarmListProvider>());
+          },
+          child: const Icon(Icons.add, color: Colors.white,),
+        ),
+        body: Center(
+          child: Container(
+            child: Column(
+              children: [
+                Expanded(
+                  child: provider.Consumer<AlarmListProvider>(
+                    builder: (context, alarmList, child) =>
+                        ListView.builder(
+                          itemCount: alarmList.length,
+                          itemBuilder: (context, index) {
+                            final alarm = alarmList[index];
+                            return _AlarmCard(
+                              alarm: alarm,
+                              onTapSwitch: (enabled) {
+                                _switchAlarm(alarmList, alarm, enabled);
+                              },
+                              onTapCard: () {
+                                _handleCardTap(alarmList, alarm, context);
+                              },
+                              onTapDelete: () {
+                                _deleteAlarm(alarmList, alarm);
+                              },
+                            );
+                          },
+                        ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
 class _AlarmCard extends StatelessWidget {
   const _AlarmCard({
     Key? key,
     required this.alarm,
     required this.onTapSwitch,
     required this.onTapCard,
+    required this.onTapDelete,
   }) : super(key: key);
 
   final Alarm alarm;
   final void Function(bool enabled) onTapSwitch;
   final VoidCallback onTapCard;
+  final VoidCallback onTapDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -143,26 +152,62 @@ class _AlarmCard extends StatelessWidget {
       margin: const EdgeInsets.all(16.0),
       child: InkWell(
         onTap: onTapCard,
-        borderRadius: BorderRadius.circular(12.0),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  alarm.timeOfDay.format(context),
-                  style: theme.textTheme.headline6!.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(
-                      alarm.enabled ? 1.0 : 0.4,
+        child: Container(
+          // 알람끼리 간격
+          // margin: const EdgeInsets.only(bottom: 20),
+          // box 내부 글씨 padding
+          // padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF856CFD).withOpacity(alarm.enabled ? 1.0 : 0.4),
+                  Color(0xff66a3ff).withOpacity(alarm.enabled ? 1.0 : 0.4)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.circular(24)
+          ),
+          child: InkWell(
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        alarm.timeOfDay.format(context),
+                        style: theme.textTheme.headline6!.copyWith(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white.withOpacity(
+                            alarm.enabled ? 1.0 : 0.4,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    Switch(
+                      value: alarm.enabled,
+                      onChanged: onTapSwitch,
+                      activeColor: Colors.white
+                    ),
+                  ],
                 ),
-              ),
-              Switch(
-                value: alarm.enabled,
-                onChanged: onTapSwitch,
-              ),
-            ],
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(""),
+                    IconButton(
+                      icon: Icon(Icons.delete),
+                      onPressed: () {
+                        // IconButton를 누를 때 실행할 함수 또는 동작
+                        onTapDelete(); // onTapDelete 함수 실행
+                      },
+                      color: Colors.white,
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
         ),
       ),

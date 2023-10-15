@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class AppUser {
   AppUser(
-      {this.uid, this.name, this.email, this.gender, this.height, this.weight, this.disease});
+      {this.uid, this.name, this.email, this.gender, this.height, this.weight, this.disease, this.waketime});
 
   factory AppUser.fromJson(Map<String, String> json) {
     return AppUser(
@@ -12,7 +12,8 @@ class AppUser {
         gender: json['gender'],
         height: json['height'],
         weight: json['weight'],
-        disease: json['disease']);
+        disease: json['disease'],
+        waketime: json['waketime']);
   }
 
   factory AppUser.fromUser(User user) {
@@ -26,4 +27,5 @@ class AppUser {
   String? height;
   String? weight;
   String? disease;
+  String? waketime;
 }

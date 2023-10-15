@@ -169,6 +169,23 @@ class UserInfoDataSource {
     return true;
   }
 
+  // 알람 울리는 시간 정보 설정
+  Future<bool> updateMyTimeInfo({
+    required String uid,
+    required String waketime
+  }) async {
+    try {
+      final db = FirebaseFirestore.instance;
+      await db.collection("users").doc(uid).update({
+        "waketime": waketime
+      });
+    } catch (e) {
+      print("회원 기상 정보 업데이트 오류 (remote_data_source)");
+      return false;
+    }
+    return true;
+  }
+
   ///응원팀 조회
   Future<int> getMyTeam({required String uid}) async {
     final db = FirebaseFirestore.instance;

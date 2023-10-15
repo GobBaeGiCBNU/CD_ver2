@@ -88,6 +88,21 @@ class UserViewModel extends ChangeNotifier {
     });
   }
 
+  Future<void> updateTimeInfo({
+    required String uid,
+    required String waketime,
+  })async {
+    return await userInfoRepositoryProvider
+        .updateMyTimeInfo(
+            uid: _user!.uid!,
+            waketime: waketime
+            )
+        .then((result) {
+          _user!.waketime = waketime;
+      notifyListeners();
+    });
+  }
+
   bool autoSignIn() {
     final tempUser = authRepositoryProvider.autoSignIn();
     if (tempUser != null) {

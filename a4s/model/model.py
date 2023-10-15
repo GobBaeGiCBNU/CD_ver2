@@ -12,6 +12,8 @@ from sklearn.metrics import classification_report
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import FunctionTransformer
 
+result_dir = './result/'
+
 annotation_desc_2_event_id = {'Sleep stage W': 1,
                               'Sleep stage 1': 2,
                               'Sleep stage 2': 2,

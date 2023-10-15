@@ -197,6 +197,12 @@ class _AlarmCard extends StatelessWidget {
           minute: wakeTime.minute,
         );
       }
+      else if (wakeTime.hour > 12) {
+        wakeTime = TimeOfDay(
+          hour: wakeTime.hour - 12,
+          minute: wakeTime.minute,
+        );
+      }
       break;
     case "1시간 30분":
       wakeTime = TimeOfDay(

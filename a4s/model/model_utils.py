@@ -1,7 +1,13 @@
 import mne
 from mne.datasets.sleep_physionet.age import fetch_data
-
 from torch.utils.data import Dataset, ConcatDataset
+import torch
+from sklearn.model_selection import LeavePGroupsOut
+import numpy as np
+from sklearn.metrics import balanced_accuracy_score
+from sklearn.metrics import confusion_matrix
+import matplotlib as plt
+import seaborn as sns
 
 def load_sleep_physionet_raw(raw_fname, annot_fname, load_eeg_only=True, 
                              crop_wake_mins=30):
@@ -61,9 +67,7 @@ def load_sleep_physionet_raw(raw_fname, annot_fname, load_eeg_only=True,
     raw.info['subject_info'] = {'id': subj_nb, 'rec_id': rec_nb}
    
     return raw
-
-
-        
+     
 def extract_epochs(raw, chunk_duration=30.):
     """Extract non-overlapping epochs from raw data.
     
@@ -106,8 +110,6 @@ def extract_epochs(raw, chunk_duration=30.):
                         event_id=event_id, tmin=0., tmax=tmax, baseline=None)
     
     return epochs.get_data(), epochs.events[:, 2] - 1
-
-
 
 class EpochsDataset(Dataset):
     """Class to expose an MNE Epochs object as PyTorch dataset.
@@ -161,9 +163,6 @@ def scale(X):
     """
     X -= np.mean(X, axis=1, keepdims=True)
     return X / np.std(X, axis=1, keepdims=True)
-
-from sklearn.model_selection import LeavePGroupsOut
-
 
 def pick_recordings(dataset, subj_rec_nbs):
     """Pick recordings using subject and recording numbers.
@@ -229,3 +228,182 @@ def train_test_split(dataset, n_groups, split_by='subj_nb'):
     test_ds = ConcatDataset([dataset.datasets[i] for i in test_idx])
         
     return train_ds, test_ds
+
+
+
+def _do_train(model, loader, optimizer, criterion, device, metric):
+    # training loop
+    model.train()
+    
+    train_loss = np.zeros(len(loader))
+    y_pred_all, y_true_all = list(), list()
+    for idx_batch, (batch_x, batch_y) in enumerate(loader):
+        optimizer.zero_grad()
+        batch_x = batch_x.to(device=device, dtype=torch.float32)
+        batch_y = batch_y.to(device=device, dtype=torch.int64)
+
+        output = model(batch_x)
+        loss = criterion(output, batch_y)
+
+        loss.backward()
+        optimizer.step()
+        
+        y_pred_all.append(torch.argmax(output, axis=1).cpu().numpy())
+        y_true_all.append(batch_y.cpu().numpy())
+
+        train_loss[idx_batch] = loss.item()
+        
+    y_pred = np.concatenate(y_pred_all)
+    y_true = np.concatenate(y_true_all)
+    perf = metric(y_true, y_pred)
+    
+    return np.mean(train_loss), perf
+        
+
+def _validate(model, loader, criterion, device, metric):
+    # validation loop
+    model.eval()
+    
+    val_loss = np.zeros(len(loader))
+    y_pred_all, y_true_all = list(), list()
+    with torch.no_grad():
+        for idx_batch, (batch_x, batch_y) in enumerate(loader):
+            batch_x = batch_x.to(device=device, dtype=torch.float32)
+            batch_y = batch_y.to(device=device, dtype=torch.int64)
+            output = model.forward(batch_x)
+
+            loss = criterion(output, batch_y)
+            val_loss[idx_batch] = loss.item()
+            
+            y_pred_all.append(torch.argmax(output, axis=1).cpu().numpy())
+            y_true_all.append(batch_y.cpu().numpy())
+            
+    y_pred = np.concatenate(y_pred_all)
+    y_true = np.concatenate(y_true_all)
+    perf = metric(y_true, y_pred)
+
+    return np.mean(val_loss), perf
+
+
+def train(model, loader_train, loader_valid, optimizer, criterion, n_epochs, 
+          patience, device, metric=None):
+    """Training function.
+    
+    Parameters
+    ----------
+    model : instance of nn.Module
+        The model.
+    loader_train : instance of Sampler
+        The generator of EEG samples the model has to train on.
+        It contains n_train samples
+    loader_valid : instance of Sampler
+        The generator of EEG samples the model has to validate on.
+        It contains n_val samples. The validation samples are used to
+        monitor the training process and to perform early stopping
+    optimizer : instance of optimizer
+        The optimizer to use for training.
+    n_epochs : int
+        The maximum of epochs to run.
+    patience : int
+        The patience parameter, i.e. how long to wait for the
+        validation error to go down.
+    metric : None | callable
+        Metric to use to evaluate performance on the training and
+        validation sets. Defaults to balanced accuracy.
+        
+    Returns
+    -------
+    best_model : instance of nn.Module
+        The model that led to the best prediction on the validation
+        dataset.
+    history : list of dicts
+        Training history (loss, accuracy, etc.)
+    """
+    best_valid_loss = np.inf
+    best_model = copy.deepcopy(model)
+    waiting = 0
+    history = list()
+    
+    if metric is None:
+        metric = balanced_accuracy_score
+        
+    print('epoch \t train_loss \t valid_loss \t train_perf \t valid_perf')
+    print('-------------------------------------------------------------------')
+
+    for epoch in range(1, n_epochs + 1):
+        train_loss, train_perf = _do_train(
+            model, loader_train, optimizer, criterion, device, metric=metric)
+        valid_loss, valid_perf = _validate(
+            model, loader_valid, criterion, device, metric=metric)
+        history.append(
+            {'epoch': epoch, 
+             'train_loss': train_loss, 'valid_loss': valid_loss,
+             'train_perf': train_perf, 'valid_perf': valid_perf})
+        
+        print(f'{epoch} \t {train_loss:0.4f} \t {valid_loss:0.4f} '
+              f'\t {train_perf:0.4f} \t {valid_perf:0.4f}')
+
+        # model saving
+        if valid_loss < best_valid_loss:
+            print(f'best val loss {best_valid_loss:.4f} -> {valid_loss:.4f}')
+            best_valid_loss = valid_loss
+            best_model = copy.deepcopy(model)
+            waiting = 0
+        else:
+            waiting += 1
+
+        # model early stopping
+        if waiting >= patience:
+            print(f'Stop training at epoch {epoch}')
+            print(f'Best val loss : {best_valid_loss:.4f}')
+            break
+
+    return best_model, history
+
+# 6. Visualizing results
+def plot_confusion_matrix(conf_mat, classes_mapping):
+    ticks = list(classes_mapping.keys())
+    tick_marks = np.arange(len(ticks))
+    tick_labels = classes_mapping.values()
+
+    fig, ax = plt.subplots(figsize=(6, 6))
+    im = ax.imshow(conf_mat, cmap='Reds')
+
+    ax.set_yticks(tick_marks)
+    ax.set_yticklabels(tick_labels)
+    ax.set_xticks(tick_marks)
+    ax.set_xticklabels(tick_labels)
+    ax.set_ylabel('True label')
+    ax.set_xlabel('Predicted label')
+    ax.set_title('Confusion matrix')
+
+    for i in range(len(ticks)):
+        for j in range(len(ticks)):
+            text = ax.text(
+                j, i, conf_mat[i, j], ha='center', va='center', color='k')
+
+    fig.colorbar(im, ax=ax, fraction=0.05, label='# examples')
+    fig.tight_layout()
+    
+    return fig, ax
+
+# Normalized
+
+
+
+def normal_plot_confusion_matrix(conf_mat, classes_mapping):
+    ticks = classes_mapping.values()
+
+    fig, ax = plt.subplots(figsize=(6, 6))
+    im = ax.imshow(conf_mat, cmap='Reds')
+
+    sns.heatmap(conf_mat, annot=True, fmt='.2f', 
+                xticklabels=ticks, yticklabels=ticks, cmap=plt.cm.Reds)
+
+
+    ax.set_ylabel('True label')
+    ax.set_xlabel('Predicted label')
+    ax.set_title('Normalized Confusion matrix')
+    fig.tight_layout()
+    
+    return fig, ax

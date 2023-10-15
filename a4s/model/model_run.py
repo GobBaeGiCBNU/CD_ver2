@@ -29,6 +29,7 @@ from sklearn.metrics import classification_report
 
 mne.set_log_level('ERROR')  # To avoid flooding the cell outputs with messages
 
+result_dir = './result/'
 subjects = range(30)
 recordings = [1]
 
@@ -151,7 +152,7 @@ cm = confusion_matrix(y_true, y_pred)
 n_cm = cm.astype(float) / cm.sum(axis=1)[:, np.newaxis] #합이 1이 되록
 mu.normal_plot_confusion_matrix(n_cm, classes_mapping);
 
-plt.show()
+# plt.show()
 
 # Plot hypnogram for one recording
 mask = rec_ids == 0  # pick a recording number
@@ -164,6 +165,9 @@ ax.set_yticklabels(['W', 'Light Sleep', 'Deep Sleep', 'R'])
 ax.set_xlabel('Time (h)')
 ax.set_title('Hypnogram')
 ax.legend();
-plt.show()
+# plt.show()
+result_file_path = result_dir + '231015_hypnogram_plot.png'
+plt.savefig(result_file_path)
+print(f"Hypnogram 이미지가 {result_dir} 경로에 저장되었습니다.")
 
 print(classification_report(y_true, y_pred, target_names=event_id.keys()))

@@ -8,7 +8,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:a4s/data/view/user_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:a4s/myPage/profile.dart';
-
 import 'package:a4s/model/alarm.dart';
 import 'package:a4s/provider/alarm_list_provider.dart';
 import 'package:a4s/service/alarm_scheduler.dart';

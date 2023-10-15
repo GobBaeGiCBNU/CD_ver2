@@ -65,6 +65,7 @@ dependencies:
   vibration: ^1.8.3
   google_sign_in: ^6.1.5
   table_calendar: ^3.0.9
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:
@@ -95,6 +96,7 @@ flutter:
   assets:
   - assets/
   - assets/navbar/
+  - assets/result/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

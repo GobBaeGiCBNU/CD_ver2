@@ -5,8 +5,6 @@ import 'package:a4s/data/view/user_view_model.dart';
 import 'package:get/get.dart';
 import 'package:health/health.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:a4s/alarm/alarm_observer.dart';
-
 
 /// 회원가입 화면
 class SignUpPage4 extends ConsumerStatefulWidget {
@@ -145,7 +143,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage4> {
                   onPressed: () async {
                     Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => AlarmObserver(child: MainPage())),
+                        MaterialPageRoute(builder: (context) => MainPage()),
                         (route) => false);
                   },
                   child: Text(

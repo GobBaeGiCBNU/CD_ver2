@@ -6,6 +6,7 @@ import 'package:a4s/data/view/user_view_model.dart';
 import 'package:get/get.dart';
 import 'package:health/health.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:permission_handler_platform_interface/permission_handler_platform_interface.dart';
 
 /// 회원가입 화면
 class SignUpPage3 extends ConsumerStatefulWidget {
@@ -16,6 +17,36 @@ class SignUpPage3 extends ConsumerStatefulWidget {
 class _SignUpPageState extends ConsumerState<SignUpPage3> {
   TextStyle style = TextStyle(fontFamily: 'NanumSquare', fontSize: 18.0);
   final _key = GlobalKey<ScaffoldState>();
+
+  Future<bool> requestPermission() async {
+    // 권한 요청
+    Map<Permission, PermissionStatus> statues =
+        await [Permission.microphone, Permission.sensors].request();
+    print('per1 : $statues');
+    // 결과 확인
+    if (!statues.values.every((element) => element.isGranted)) {
+      // 허용이 안된 경우
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            // 권한없음을 다이얼로그로 알림
+            return AlertDialog(
+              content: const Text("권한 설정을 확인해주세요."),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      openAppSettings(); // 앱 설정으로 이동
+                    },
+                    child: const Text('설정하기')),
+              ],
+            );
+          });
+    } else {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => SignUpPage4()));
+    }
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -146,8 +177,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage3> {
                 height: 80,
                 elevation: 10.0,
                 onPressed: () async {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => SignUpPage4()));
+                  requestPermission();
                 },
                 child: Icon(
                   Icons.arrow_right_alt,
@@ -162,3 +192,32 @@ class _SignUpPageState extends ConsumerState<SignUpPage3> {
     );
   }
 }
+
+// class PermissionManage{
+//   /// 센서, 녹음 권한 요청
+//   Future<bool> requestPermission(BuildContext context) async {
+//     // 권한 요청
+//     Map<Permission, PermissionStatus> permissions = await [Permission.microphone, Permission.sensors].request();
+//     print('per1 : $permissions');
+//     // 결과 확인
+//     if(!permissions.values.every((element) => element.isGranted)) { // 허용이 안된 경우
+//       showDialog(
+//           context: context,
+//           builder: (BuildContext context) {
+//             // 권한없음을 다이얼로그로 알림
+//             return AlertDialog(
+//               content: const Text("권한 설정을 확인해주세요."),
+//               actions: [
+//                 TextButton(
+//                     onPressed: () {
+//                       openAppSettings(); // 앱 설정으로 이동
+//                     },
+//                     child: const Text('설정하기')),
+//               ],
+//             );
+//           });
+//       return false;
+//     }
+//     return true;
+//   }
+// }

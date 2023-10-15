@@ -7,12 +7,12 @@ import 'package:a4s/data/view/user_view_model.dart';
 import 'package:get/get.dart';
 
 /// 회원가입 화면
-class SignUpPage2 extends ConsumerStatefulWidget {
+class SignUpPage2_Google extends ConsumerStatefulWidget {
   @override
   _SignUpPageState createState() => _SignUpPageState();
 }
 
-class _SignUpPageState extends ConsumerState<SignUpPage2> {
+class _SignUpPageState extends ConsumerState<SignUpPage2_Google> {
   TextStyle style = TextStyle(fontFamily: 'NanumSquare', fontSize: 18.0);
   late TextEditingController _name;
   late TextEditingController _gender;
@@ -109,9 +109,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage2> {
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.person),
                     labelText: "이름",
-                    labelStyle: TextStyle(
-                          color: Color(0xff6499ff)
-                        ),
                     filled: true,
                     fillColor: Color(0xffF6F6F6),
                     border: OutlineInputBorder(
@@ -136,9 +133,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage2> {
                     textFieldDecoration: InputDecoration(
                         prefixIcon: const Icon(Icons.favorite),
                         labelText: "성별",
-                        labelStyle: TextStyle(
-                          color: Color(0xff6499ff)
-                        ),
                         filled: true,
                         fillColor: const Color(0xffF6F6F6),
                         border: OutlineInputBorder(
@@ -158,9 +152,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage2> {
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.height),
                     labelText: "키",
-                    labelStyle: TextStyle(
-                          color: Color(0xff6499ff)
-                        ),
                     filled: true,
                     fillColor: Color(0xffF6F6F6),
                     border: OutlineInputBorder(
@@ -181,9 +172,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage2> {
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.line_weight),
                     labelText: "몸무게",
-                    labelStyle: TextStyle(
-                          color: Color(0xff6499ff)
-                        ),
                     filled: true,
                     fillColor: Color(0xffF6F6F6),
                     border: OutlineInputBorder(
@@ -207,11 +195,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage2> {
                     searchShowCursor: false,
                     searchKeyboardType: TextInputType.number,
                     textFieldDecoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.sick),
+                        prefixIcon: const Icon(Icons.favorite),
                         labelText: "기저질환",
-                        labelStyle: TextStyle(
-                          color: Color(0xff6499ff)
-                        ),
                         filled: true,
                         fillColor: const Color(0xffF6F6F6),
                         border: OutlineInputBorder(

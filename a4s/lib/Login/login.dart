@@ -1,13 +1,15 @@
+import 'package:a4s/Login/signup_2_google.dart';
+import 'package:a4s/Login/signup_3.dart';
 import 'package:a4s/Login/signup_4.dart';
-import 'package:a4s/model/alarm.dart';
+import 'package:a4s/alarm/alarm_observer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:a4s/login/reset_password.dart';
 import '../MainPage/main_page.dart';
 import '../data/view/user_view_model.dart';
 import './signup.dart';
-import 'package:a4s/alarm/alarm_observer.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 // 로그인 화면
 class LoginPage extends ConsumerStatefulWidget {
@@ -23,6 +25,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   late TextEditingController _password;
 
   final _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -119,17 +122,49 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       height: 70,
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
+                          setState(() {
+                            isLoading = true;
+                          });
                           try {
                             await user.emailSignIn(
                                 email: _email.value.text,
                                 password: _password.value.text);
+                            setState(() {
+                              isLoading = false;
+                            });
                             Navigator.pop(context);
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => AlarmObserver(child: MainPage())));
+                                    builder: (context) =>
+                                        AlarmObserver(child: MainPage())));
                           } catch (e) {
+                            setState(() {
+                              isLoading = false;
+                            });
                             print(e);
+                            showDialog(
+                              context: context,
+                              barrierDismissible: true, //바깥 영역 터치시 닫을지 여부 결정
+                              builder: ((context) {
+                                return AlertDialog(
+                                  backgroundColor: Colors.white,
+                                  surfaceTintColor: Colors.white,
+                                  title: const Text("로그인 실패"),
+                                  content: const Text("계정이 존재하지 않습니다."),
+                                  actions: <Widget>[
+                                    Container(
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop(); //창 닫기
+                                        },
+                                        child: const Text("X"),
+                                      ),
+                                    )
+                                  ],
+                                );
+                              }),
+                            );
                             print("로그인 실패");
                           }
                         }
@@ -154,16 +189,57 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     child: MaterialButton(
                       height: 70,
                       onPressed: () async {
+                        setState(() {
+                          isLoading = true;
+                        });
                         try {
-                          //await user.kakaoSignIn();
-                          // 카톡 로그인 부분 지움
-                          Navigator.pop(context);
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => AlarmObserver(child: MainPage())));
+                          //await user.GoogleSignIn();
+                          setState(() {
+                            isLoading = false;
+                          });
+                          print(user.user!.gender);
+                          if (user.user!.gender == null) {
+                            // ignore: use_build_context_synchronously
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        SignUpPage2_Google()));
+                          } else {
+                            Navigator.pop(context);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        AlarmObserver(child: MainPage())));
+                          }
                         } catch (e) {
+                          setState(() {
+                            isLoading = false;
+                          });
                           print(e);
+                          showDialog(
+                            context: context,
+                            barrierDismissible: true, //바깥 영역 터치시 닫을지 여부 결정
+                            builder: ((context) {
+                              return AlertDialog(
+                                backgroundColor: Colors.white,
+                                surfaceTintColor: Colors.white,
+                                title: const Text("로그인 실패"),
+                                content: const Text("계정이 존재하지 않습니다."),
+                                actions: <Widget>[
+                                  Container(
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(); //창 닫기
+                                      },
+                                      child: const Text("X"),
+                                    ),
+                                  )
+                                ],
+                              );
+                            }),
+                          );
                           print("로그인 실패");
                         }
                       },

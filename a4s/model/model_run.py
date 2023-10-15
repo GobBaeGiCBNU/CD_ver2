@@ -1,6 +1,3 @@
-# from tensorflow.python.client import device_lib
-# device_lib.list_local_devices()
-
 import torch
 from torch import nn
 print(torch.__version__)
@@ -27,6 +24,8 @@ from torch.optim import Adam
 
 from sklearn.metrics import cohen_kappa_score
 from sklearn.metrics import balanced_accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
 
 mne.set_log_level('ERROR')  # To avoid flooding the cell outputs with messages
 
@@ -146,3 +145,25 @@ test_kappa = cohen_kappa_score(y_true, y_pred)
 
 print(f'Test balanced accuracy: {test_bal_acc:0.3f}')
 print(f'Test Cohen\'s kappa: {test_kappa:0.3f}')
+
+# Normalized confusion matrix
+cm = confusion_matrix(y_true, y_pred)
+n_cm = cm.astype(float) / cm.sum(axis=1)[:, np.newaxis] #합이 1이 되록
+mu.normal_plot_confusion_matrix(n_cm, classes_mapping);
+
+plt.show()
+
+# Plot hypnogram for one recording
+mask = rec_ids == 0  # pick a recording number
+t = np.arange(len(y_true[mask])) * 30 / 3600
+fig, ax = plt.subplots(figsize=(12, 3))
+ax.plot(t, y_true[mask], label='True')
+ax.plot(t, y_pred[mask], alpha=0.7, label='Predicted')
+ax.set_yticks([0, 1, 2, 3])
+ax.set_yticklabels(['W', 'Light Sleep', 'Deep Sleep', 'R'])
+ax.set_xlabel('Time (h)')
+ax.set_title('Hypnogram')
+ax.legend();
+plt.show()
+
+print(classification_report(y_true, y_pred, target_names=event_id.keys()))

@@ -388,9 +388,6 @@ def plot_confusion_matrix(conf_mat, classes_mapping):
     return fig, ax
 
 # Normalized
-
-
-
 def normal_plot_confusion_matrix(conf_mat, classes_mapping):
     ticks = classes_mapping.values()
 

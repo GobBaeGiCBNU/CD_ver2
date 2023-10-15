@@ -17,7 +17,7 @@ class remoteDataSource {
 ///인증에 관련된 외부데이터소스
 class AuthDataSource extends remoteDataSource {
   // ///카카오를 통한 간편로그인
-  // Future<User> kakaoSignIn() async {
+  // Future<User> GoogleSignIn() async {
   //   if (!await checkNetwork()) {
   //     throw Exception("인터넷 연결 없음");
   //   }
@@ -67,20 +67,20 @@ class AuthDataSource extends remoteDataSource {
   //   }
   //   Kakao.User user = await Kakao.UserApi.instance.me();
 
-  //   //파이어베이스에 카카오 인증 uid를 통해 계정 생성
-  //   var response =
-  //       await get(Uri.http('localhost:8000', '/', {'id': user.id.toString()}));
-  //   var responseBody = response.body;
-  //   final userCredential = await FirebaseAuth.instance
-  //       .signInWithCustomToken(responseBody.toString());
-  //   final realUser = userCredential.user;
-  //   //첫 카카오를 통한 로그인이라면 파이어베이스 계정 정보 초기화
-  //   if (realUser?.displayName == null && realUser?.photoURL == null) {
-  //     await realUser?.updateDisplayName(user.kakaoAccount!.profile!.nickname);
-  //     await realUser
-  //         ?.updatePhotoURL(user.kakaoAccount!.profile!.profileImageUrl);
-  //   }
-  //   return realUser!;
+  // //파이어베이스에 카카오 인증 uid를 통해 계정 생성
+  // var response =
+  //     await get(Uri.http('localhost:8000', '/', {'id': user.id.toString()}));
+  // var responseBody = response.body;
+  // final userCredential = await FirebaseAuth.instance
+  //     .signInWithCustomToken(responseBody.toString());
+  // final realUser = userCredential.user;
+  // //첫 카카오를 통한 로그인이라면 파이어베이스 계정 정보 초기화
+  // if (realUser?.displayName == null && realUser?.photoURL == null) {
+  //   await realUser?.updateDisplayName(user.kakaoAccount!.profile!.nickname);
+  //   await realUser
+  //       ?.updatePhotoURL(user.kakaoAccount!.profile!.profileImageUrl);
+  // }
+  // return realUser!;
   // }
 
   ///로그아웃
@@ -97,14 +97,10 @@ class AuthDataSource extends remoteDataSource {
   }
 
   ///이메일 회원가입
-  Future<User> emailSignUp({
-    required String email,
-    required String password,
-    required String name,
-    required String gender,
-    required String height,
-    required String weight,
-  }) async {
+  Future<User> emailSignUp(
+      {required String email,
+      required String password,
+      required String name}) async {
     try {
       final credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
@@ -141,27 +137,39 @@ class AuthDataSource extends remoteDataSource {
 
   ///유저 정보 업데이트
   Future<void> updateUserInfo(
-      {required String email, required String nickname}) async {
+      {required String email, required String name}) async {
     await FirebaseAuth.instance.currentUser?.updateEmail(email);
-    await FirebaseAuth.instance.currentUser?.updateDisplayName(nickname);
+    await FirebaseAuth.instance.currentUser?.updateDisplayName(name);
   }
 }
 
 ///인증정보를 제외한 유저 정보에 관련된 외부데이터소스
 class UserInfoDataSource {
   ///응원팀 생성 및 업데이트
-  Future<bool> updateMyTeam({required String uid}) async {
+  Future<bool> updateMySleepInfo({
+    required String uid,
+    required String gender,
+    required String height,
+    required String weight,
+    required String disease,
+  }) async {
     try {
       final db = FirebaseFirestore.instance;
+      await db.collection("users").doc(uid).set({
+        "gender": gender,
+        "height": height,
+        "weight": weight,
+        "disease": disease
+      });
     } catch (e) {
-      print("응원팀 업데이트 오류");
+      print("회원 수면 정보 업데이트 오류 (remote_data_source)");
       return false;
     }
     return true;
   }
 
   ///응원팀 조회
-  Future<String> getMyTeam({required String uid}) async {
+  Future<int> getMyTeam({required String uid}) async {
     final db = FirebaseFirestore.instance;
     DocumentSnapshot teamDoc = await db.collection("users").doc(uid).get();
     Map data = teamDoc.data() as Map<String, dynamic>;

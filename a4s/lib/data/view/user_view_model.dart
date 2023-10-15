@@ -4,6 +4,7 @@ import 'package:a4s/data/model/app_user.dart';
 import 'package:a4s/data/repository/auth_repository.dart';
 import 'package:a4s/data/repository/user_info_repository.dart';
 import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 final userViewModelProvider =
     ChangeNotifierProvider<UserViewModel>((ref) => UserViewModel());
@@ -15,11 +16,11 @@ class UserViewModel extends ChangeNotifier {
 
   bool get isAuthenticated => _user != null;
 
-  // Future<void> kakaoSignIn() {
-  //   return authRepositoryProvider.kakaoSignIn().then((result) async {
+  // Future<void> GoogleSignIn() {
+  //   return authRepositoryProvider.GoogleSignIn().then((result) async {
   //     _user = result;
   //     try {
-  //       _user!.team =
+  //       _user!.gender =
   //           await userInfoRepositoryProvider.getMyTeam(uid: _user!.uid!);
   //     } catch (e) {
   //       //처음 카카오 로그인
@@ -35,19 +36,23 @@ class UserViewModel extends ChangeNotifier {
     required String gender,
     required String height,
     required String weight,
+    required String disease,
   }) {
     return authRepositoryProvider
-        .emailSignUp(
-            email: email,
-            password: password,
-            name: name,
-            gender: gender,
-            height: height,
-            weight: weight)
+        .emailSignUp(email: email, password: password, name: name)
         .then((result) {
       _user = result;
       _user!.name = name;
-      userInfoRepositoryProvider.updateMyTeam(uid: _user!.uid!);
+      userInfoRepositoryProvider.updateMySleepInfo(
+          uid: _user!.uid!,
+          gender: gender,
+          height: height,
+          weight: weight,
+          disease: disease);
+      _user!.weight = weight;
+      _user!.height = height;
+      _user!.gender = gender;
+      _user!.disease = disease;
       notifyListeners();
     });
   }
@@ -64,9 +69,20 @@ class UserViewModel extends ChangeNotifier {
     });
   }
 
-  Future<void> updateTeam({required String team}) async {
+  Future<void> updateSleepInfo({
+    required String uid,
+    required String gender,
+    required String height,
+    required String weight,
+    required String disease,
+  }) async {
     return await userInfoRepositoryProvider
-        .updateMyTeam(uid: _user!.uid!)
+        .updateMySleepInfo(
+            uid: _user!.uid!,
+            gender: gender,
+            height: height,
+            weight: weight,
+            disease: disease)
         .then((result) {
       notifyListeners();
     });
@@ -103,14 +119,28 @@ class UserViewModel extends ChangeNotifier {
   }
 
   ///유저 정보 업데이트
-  Future<void> updateUserInfo(
-      {required String uid,
-      required String email,
-      required String name}) async {
+  Future<void> updateUserInfo({
+    required String uid,
+    required String email,
+    required String name,
+    required String gender,
+    required String height,
+    required String weight,
+    required String disease,
+  }) async {
     await authRepositoryProvider.updateUserInfo(email: email, name: name);
     _user!.email = email;
     _user!.name = name;
-    await userInfoRepositoryProvider.updateMyTeam(uid: uid);
+    await userInfoRepositoryProvider.updateMySleepInfo(
+        uid: uid,
+        gender: gender,
+        height: height,
+        weight: weight,
+        disease: disease);
+    _user!.weight = weight;
+    _user!.height = height;
+    _user!.gender = gender;
+    _user!.disease = disease;
     notifyListeners();
   }
 }

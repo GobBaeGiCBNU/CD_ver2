@@ -155,6 +155,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage2> {
                   controller: _height,
                   validator: (value) => (value!.isEmpty) ? "키를 입력 해 주세요" : null,
                   style: style,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.height),
                     labelText: "키",
@@ -178,6 +179,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage2> {
                   validator: (value) =>
                       (value!.isEmpty) ? "몸무게를 입력 해 주세요" : null,
                   style: style,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.line_weight),
                     labelText: "몸무게",

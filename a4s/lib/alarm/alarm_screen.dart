@@ -52,7 +52,7 @@ class _AlarmScreenState extends State<AlarmScreen> with WidgetsBindingObserver {
     // 따라서 이를 7로 나눈 몫이 해당 요일을 나타낸다.
     final firedAlarmWeekday = callbackAlarmId % 7;
     final nextAlarmTime =
-    widget.alarm.timeOfDay.toComingDateTimeAt(firedAlarmWeekday);
+        widget.alarm.timeOfDay.toComingDateTimeAt(firedAlarmWeekday);
 
     await AlarmScheduler.reschedule(callbackAlarmId, nextAlarmTime);
 
@@ -67,16 +67,31 @@ class _AlarmScreenState extends State<AlarmScreen> with WidgetsBindingObserver {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              '알람 화면',
-              style: Theme.of(context).textTheme.headline4,
+              '알람',
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.w600
+              ),
             ),
-            TextButton(
-              onPressed:() {
-                _dismissAlarm();
-                _vibrationTimer?.cancel();
-                },
-              child: const Text('알람 해제'),
-
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 120, 0, 0),
+              child: Material(
+                color: Color(0xff6499ff),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                child: MaterialButton(
+                  onPressed: () {
+                    _dismissAlarm();
+                    _vibrationTimer?.cancel();
+                  },
+                  child: const Text(
+                    '중단',
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
+                  height: 60,
+                ),
+              ),
             ),
           ],
         ),

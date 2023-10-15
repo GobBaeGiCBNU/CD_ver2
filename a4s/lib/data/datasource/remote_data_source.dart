@@ -155,7 +155,7 @@ class UserInfoDataSource {
   }) async {
     try {
       final db = FirebaseFirestore.instance;
-      await db.collection("users").doc(uid).set({
+      await db.collection("users").doc(uid).update({
         "id": uid,
         "gender": gender,
         "height": height,

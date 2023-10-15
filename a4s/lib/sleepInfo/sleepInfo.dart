@@ -242,7 +242,7 @@ class _SleepInfo extends ConsumerState<SleepInfo> {
                         onPressed: toggleSelect,
                       ),
                       if (isVisual == true)
-                        Image.asset('assets/result/231015_sleepstage_hypnogram.png',
+                        Image.asset('assets/result/231016_sleepstage_hypnogram.png',
                           width: 400,
                           height: 200,)
 

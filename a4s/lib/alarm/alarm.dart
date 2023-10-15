@@ -211,7 +211,7 @@ class _AlarmCard extends StatelessWidget {
         if (wakeTime.hour < 0) {
           wakeTime = TimeOfDay(
             hour: wakeTime.hour + 24,
-            minute: 60 + wakeTime.minute,
+            minute: wakeTime.minute,
           );
         }
       }
@@ -329,7 +329,7 @@ class _AlarmCard extends StatelessWidget {
                         ),
                         Text(
                           (time.hour.toString() +
-                              ' : ' +
+                              ':' +
                               time.minute.toString() +
                               ' ~ ' +
                               alarm.timeOfDay.format(context) +

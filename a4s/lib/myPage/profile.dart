@@ -43,18 +43,17 @@ class _EditState extends ConsumerState<Edit> {
     DropDownValueModel(name: "불면증", value: "불면증")
   ];
 
-  
-  List <DropDownValueModel> dropDownListwakeTime = [
+  List<DropDownValueModel> dropDownListwakeTime = [
     DropDownValueModel(name: "30분", value: "30분"),
     DropDownValueModel(name: "1시간", value: "1시간"),
     DropDownValueModel(name: "1시간 30분", value: "1시간 30분"),
-    DropDownValueModel(name: "2시간", value: "2시간"),];
+    DropDownValueModel(name: "2시간", value: "2시간"),
+  ];
 
   @override
   void initState() {
     super.initState();
     final readUser = ref.read(userViewModelProvider);
-    print(readUser.user!.height);
     _email = TextEditingController(text: readUser.user!.email);
     _name = TextEditingController(text: readUser.user!.name);
     _weight = TextEditingController(text: readUser.user!.weight);
@@ -217,8 +216,7 @@ class _EditState extends ConsumerState<Edit> {
                     controller: _disease),
               ),
               Padding(
-                padding:
-                    const EdgeInsets.fromLTRB(30, 15, 30, 10),
+                padding: const EdgeInsets.fromLTRB(30, 15, 30, 10),
                 child: DropDownTextField(
                     validator: (value) => (_waketime.dropDownValue == null)
                         ? "기상 시간 범위를 선택해 주세요"
@@ -242,13 +240,14 @@ class _EditState extends ConsumerState<Edit> {
                     controller: _waketime),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 30),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 0, horizontal: 30),
                 child: Text(
                   _waketime.dropDownValue!.value + "이내에 알람이 울려요!",
                   style: TextStyle(
                     color: Color(0xff6499ff),
                     fontSize: const AdaptiveTextSize()
-                          .getadaptiveTextSize(context, 12),
+                        .getadaptiveTextSize(context, 12),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -271,6 +270,9 @@ class _EditState extends ConsumerState<Edit> {
                           height: _height.value.text,
                           gender: _cnt.dropDownValue!.value,
                           disease: _disease.dropDownValue!.value);
+                      user.updateTimeInfo(
+                          uid: user.user!.uid!,
+                          waketime: _waketime.dropDownValue!.value);
                       showDialog(
                         context: context,
                         barrierDismissible: true, //바깥 영역 터치시 닫을지 여부 결정

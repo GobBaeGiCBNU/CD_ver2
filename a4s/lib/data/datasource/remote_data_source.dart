@@ -187,12 +187,12 @@ class UserInfoDataSource {
   }
 
   ///응원팀 조회
-  Future<int> getMyTeam({required String uid}) async {
+  Future<Map> getMyInfo({required String uid}) async {
     final db = FirebaseFirestore.instance;
     DocumentSnapshot teamDoc = await db.collection("users").doc(uid).get();
     Map data = teamDoc.data() as Map<String, dynamic>;
 
-    return data["team"];
+    return data;
   }
 }
 

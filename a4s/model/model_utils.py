@@ -1,6 +1,8 @@
 import mne
 from mne.datasets.sleep_physionet.age import fetch_data
 
+from torch.utils.data import Dataset, ConcatDataset
+
 def load_sleep_physionet_raw(raw_fname, annot_fname, load_eeg_only=True, 
                              crop_wake_mins=30):
     """Load a recording from the Sleep Physionet dataset.
@@ -104,3 +106,126 @@ def extract_epochs(raw, chunk_duration=30.):
                         event_id=event_id, tmin=0., tmax=tmax, baseline=None)
     
     return epochs.get_data(), epochs.events[:, 2] - 1
+
+
+
+class EpochsDataset(Dataset):
+    """Class to expose an MNE Epochs object as PyTorch dataset.
+    
+    Parameters
+    ----------
+    epochs_data : np.ndarray
+        The epochs data, shape (n_epochs, n_channels, n_times).
+    epochs_labels : np.ndarray
+        The epochs labels, shape (n_epochs,)
+    subj_nb: None | int
+        Subject number.
+    rec_nb: None | int
+        Recording number.
+    transform : callable | None
+        The function to eventually apply to each epoch
+        for preprocessing (e.g. scaling). Defaults to None.
+    """
+    def __init__(self, epochs_data, epochs_labels, subj_nb=None, 
+                 rec_nb=None, transform=None):
+        assert len(epochs_data) == len(epochs_labels)
+        self.epochs_data = epochs_data
+        self.epochs_labels = epochs_labels
+        self.subj_nb = subj_nb
+        self.rec_nb = rec_nb
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.epochs_labels)
+
+    def __getitem__(self, idx):
+        X, y = self.epochs_data[idx], self.epochs_labels[idx]
+        if self.transform is not None:
+            X = self.transform(X)
+        X = torch.as_tensor(X[None, ...])
+        return X, y
+    
+
+def scale(X):
+    """Standard scaling of data along the last dimention.
+    
+    Parameters
+    ----------
+    X : array, shape (n_channels, n_times)
+        The input signals.
+        
+    Returns
+    -------
+    X_t : array, shape (n_channels, n_times)
+        The scaled signals.
+    """
+    X -= np.mean(X, axis=1, keepdims=True)
+    return X / np.std(X, axis=1, keepdims=True)
+
+from sklearn.model_selection import LeavePGroupsOut
+
+
+def pick_recordings(dataset, subj_rec_nbs):
+    """Pick recordings using subject and recording numbers.
+    
+    Parameters
+    ----------
+    dataset : ConcatDataset
+        The dataset to pick recordings from.        
+    subj_rec_nbs : list of tuples
+        List of pairs (subj_nb, rec_nb) to use in split.
+        
+    Returns
+    -------
+    ConcatDataset
+        The picked recordings.
+    ConcatDataset | None
+        The remaining recordings. None if all recordings from 
+        `dataset` were picked.
+    """
+    pick_idx = list()
+    for subj_nb, rec_nb in subj_rec_nbs:
+        for i, ds in enumerate(dataset.datasets):
+            if (ds.subj_nb == subj_nb) and (ds.rec_nb == rec_nb):
+                pick_idx.append(i)
+                
+    remaining_idx = np.setdiff1d(
+        range(len(dataset.datasets)), pick_idx)
+
+    pick_ds = ConcatDataset([dataset.datasets[i] for i in pick_idx])
+    if len(remaining_idx) > 0:
+        remaining_ds = ConcatDataset(
+            [dataset.datasets[i] for i in remaining_idx])
+    else:
+        remaining_ds = None
+    
+    return pick_ds, remaining_ds
+    
+
+def train_test_split(dataset, n_groups, split_by='subj_nb'):
+    """Split dataset into train and test keeping n_groups out in test.
+    
+    Parameters
+    ----------
+    dataset : ConcatDataset
+        The dataset to split.
+    n_groups : int
+        The number of groups to leave out.
+    split_by : 'subj_nb' | 'rec_nb'
+        Property to use to split dataset.
+        
+    Returns
+    -------
+    ConcatDataset
+        The training data.
+    ConcatDataset
+        The testing data.
+    """
+    groups = [getattr(ds, split_by) for ds in dataset.datasets]
+    train_idx, test_idx = next(
+        LeavePGroupsOut(n_groups).split(X=groups, groups=groups))
+
+    train_ds = ConcatDataset([dataset.datasets[i] for i in train_idx])
+    test_ds = ConcatDataset([dataset.datasets[i] for i in test_idx])
+        
+    return train_ds, test_ds

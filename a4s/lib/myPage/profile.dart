@@ -155,6 +155,7 @@ class _EditState extends ConsumerState<Edit> {
                   controller: _height,
                   validator: (value) => (value!.isEmpty) ? "키를 입력 해 주세요" : null,
                   style: style,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.height),
                     labelText: "키 변경",
@@ -176,6 +177,7 @@ class _EditState extends ConsumerState<Edit> {
                   validator: (value) =>
                       (value!.isEmpty) ? "몸무게를 입력 해 주세요" : null,
                   style: style,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.line_weight),
                     labelText: "몸무게 변경",
@@ -224,7 +226,7 @@ class _EditState extends ConsumerState<Edit> {
                     clearOption: false,
                     textFieldFocusNode: textFieldFocusNode,
                     searchFocusNode: searchFocusNode,
-                    dropDownItemCount: 2,
+                    dropDownItemCount: 4,
                     searchShowCursor: false,
                     textFieldDecoration: InputDecoration(
                         prefixIcon: const Icon(Icons.sick),
@@ -286,8 +288,9 @@ class _EditState extends ConsumerState<Edit> {
                               ElevatedButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(); //창 닫기
+                                  Navigator.of(context).pop();
                                 },
-                                child: const Text("X"),
+                                child: const Text("확인"),
                               )
                             ],
                           );

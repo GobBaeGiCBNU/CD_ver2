@@ -41,11 +41,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage3> {
               ],
             );
           });
-    } else {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => SignUpPage4()));
+      return true;
     }
-    return true;
+    return false;
   }
 
   @override
@@ -178,6 +176,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage3> {
                 elevation: 10.0,
                 onPressed: () async {
                   requestPermission();
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => SignUpPage4()));
                 },
                 child: Icon(
                   Icons.arrow_right_alt,

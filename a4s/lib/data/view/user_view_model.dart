@@ -65,6 +65,14 @@ class UserViewModel extends ChangeNotifier {
     )
         .then((result) async {
       _user = result;
+      await userInfoRepositoryProvider.getMyInfo(uid: _user!.uid!).then((value) {
+        _user!.weight = value["weight"];
+        _user!.height = value["height"];
+        _user!.gender = value["gender"];
+        _user!.disease = value["disease"];
+        _user!.waketime = value["waketime"];
+        notifyListeners();
+      });
       notifyListeners();
     });
   }
@@ -88,11 +96,28 @@ class UserViewModel extends ChangeNotifier {
     });
   }
 
+  Future<void> updateTimeInfo({
+    required String uid,
+    required String waketime,
+  }) async {
+    return await userInfoRepositoryProvider
+        .updateMyTimeInfo(uid: _user!.uid!, waketime: waketime)
+        .then((result) {
+      _user!.waketime = waketime;
+      notifyListeners();
+    });
+  }
+
   bool autoSignIn() {
     final tempUser = authRepositoryProvider.autoSignIn();
     if (tempUser != null) {
       _user = tempUser;
-      userInfoRepositoryProvider.getMyTeam(uid: _user!.uid!).then((value) {
+      userInfoRepositoryProvider.getMyInfo(uid: _user!.uid!).then((value) {
+        _user!.weight = value["weight"];
+        _user!.height = value["height"];
+        _user!.gender = value["gender"];
+        _user!.disease = value["disease"];
+        _user!.waketime = value["waketime"];
         notifyListeners();
       });
       return true;

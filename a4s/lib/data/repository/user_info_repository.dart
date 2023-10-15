@@ -8,8 +8,8 @@ final userInfoRepositoryProvider = UserInfoRepository();
 class UserInfoRepository {
   late final UserInfoDataSource _userInfoDataSource = UserInfoDataSource();
 
-  Future<int> getMyTeam({required String uid}) async {
-    return await _userInfoDataSource.getMyTeam(uid: uid);
+  Future<Map> getMyInfo({required String uid}) async {
+    return await _userInfoDataSource.getMyInfo(uid: uid);
   }
 
   Future<bool> updateMySleepInfo({
@@ -25,5 +25,14 @@ class UserInfoRepository {
         height: height,
         weight: weight,
         disease: disease);
+  }
+
+  Future<bool> updateMyTimeInfo({
+    required String uid,
+    required String waketime
+  }) async {
+    return await _userInfoDataSource.updateMyTimeInfo(
+        uid: uid,
+        waketime: waketime);
   }
 }

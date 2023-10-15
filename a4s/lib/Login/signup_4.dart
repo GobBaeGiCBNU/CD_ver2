@@ -141,6 +141,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage4> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5))),
                   onPressed: () async {
+                    user.updateTimeInfo(uid: user.user!.uid!, waketime: wakeTime[i].toString());
                     Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(builder: (context) => MainPage()),

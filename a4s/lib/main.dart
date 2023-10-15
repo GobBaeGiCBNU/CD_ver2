@@ -20,15 +20,20 @@ import 'package:a4s/alarm/permission_request_screen.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 달력
+  await initializeDateFormatting();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // 알람
   await AndroidAlarmManager.initialize();
 
   final AlarmState alarmState = AlarmState();

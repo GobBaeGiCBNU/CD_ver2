@@ -86,11 +86,11 @@ class _WhiteSound extends State<WhiteSound>{
                                         CrossAxisAlignment.start,
                                         children: [
                                           Container(
-                                            margin: EdgeInsets.only(top: 10),
+                                            margin: EdgeInsets.only(top: 12),
                                             child: Text(
                                               soundList[index].title,
                                               style: TextStyle(
-                                                  fontSize: 16,
+                                                  fontSize: 18,
                                                   fontWeight: FontWeight.bold),
                                             ),
                                           ),
@@ -98,7 +98,7 @@ class _WhiteSound extends State<WhiteSound>{
                                             margin: EdgeInsets.only(top: 10),
                                             child: Text(
                                               soundList[index].desc,
-                                              style: TextStyle(fontSize: 16),
+                                              style: TextStyle(fontSize: 14),
                                             ),
                                           ),
                                         ],

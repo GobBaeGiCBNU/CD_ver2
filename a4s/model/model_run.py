@@ -29,7 +29,7 @@ from sklearn.metrics import classification_report
 
 mne.set_log_level('ERROR')  # To avoid flooding the cell outputs with messages
 
-result_dir = './result/'
+result_dir = '../assets/result/'
 subjects = range(30)
 recordings = [1]
 

@@ -157,7 +157,7 @@ mu.normal_plot_confusion_matrix(n_cm, classes_mapping);
 # Plot hypnogram for one recording
 mask = rec_ids == 0  # pick a recording number
 t = np.arange(len(y_true[mask])) * 30 / 3600
-fig, ax = plt.subplots(figsize=(12, 3))
+fig, ax = plt.subplots(figsize=(8, 4))
 ax.plot(t, y_true[mask], label='True')
 ax.plot(t, y_pred[mask], alpha=0.7, label='Predicted')
 ax.set_yticks([0, 1, 2, 3])
@@ -166,7 +166,7 @@ ax.set_xlabel('Time (h)')
 ax.set_title('Hypnogram')
 ax.legend();
 # plt.show()
-result_file_path = result_dir + '231015_hypnogram_plot.png'
+result_file_path = result_dir + '231016_hypnogram_plot.png'
 plt.savefig(result_file_path)
 print(f"Hypnogram 이미지가 {result_dir} 경로에 저장되었습니다.")
 

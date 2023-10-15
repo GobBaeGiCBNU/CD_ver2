@@ -156,6 +156,7 @@ class UserInfoDataSource {
     try {
       final db = FirebaseFirestore.instance;
       await db.collection("users").doc(uid).set({
+        "id": uid,
         "gender": gender,
         "height": height,
         "weight": weight,

@@ -19,6 +19,7 @@ class UserInfoRepository {
     required String weight,
     required String disease,
   }) async {
+    print(gender);
     return await _userInfoDataSource.updateMySleepInfo(
         uid: uid,
         gender: gender,

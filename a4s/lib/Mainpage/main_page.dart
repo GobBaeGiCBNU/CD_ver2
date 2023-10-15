@@ -1,6 +1,6 @@
 import 'package:a4s/notification.dart';
 import 'package:a4s/sleepInfo/sleepInfo.dart';
-import 'package:a4s/therapy.dart';
+import 'package:a4s/therapy/therapy.dart';
 import 'package:flutter/material.dart';
 import 'package:a4s/alarm/alarm.dart';
 import 'package:a4s/data/repository/auth_repository.dart';

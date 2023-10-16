@@ -21,10 +21,24 @@ class SleepInfo extends ConsumerStatefulWidget {
   _SleepInfo createState() => _SleepInfo();
 }
 
+// 달력 marker event
 class Event {
-  final DateTime date ;
-  Event({required this.date});
+  String title;
+  Event(this.title);
 }
+
+// class PositionData {
+//   const PositionData(
+//     this.position,
+//     this.bufferedPosition,
+//     this.duration
+//   );
+//
+//   final Duration position;
+//   final Duration bufferedPosition;
+//   final Duration duration;
+// }
+
 
 class _SleepInfo extends ConsumerState<SleepInfo> {
   int pageNum = 2;
@@ -37,20 +51,58 @@ class _SleepInfo extends ConsumerState<SleepInfo> {
   // 달력 기능 변수들
   DateTime _now = DateTime.now();
   CalendarFormat _calendarFormat = CalendarFormat.month;
-  DateTime? _selectedDay;
+  DateTime? _selectedDay = DateTime.now();
   List<String> days = ['_', '월', '화', '수', '목', '금', '토', '일'];
 
+  List<String> _selectedImages = [];
+  String _selectedImage = "";
+
+  // 달력 format 상태 저장할 변수
+  CalendarFormat format = CalendarFormat.month;
+
+  dynamic itemList = [
+    {
+      "image" : "assets/result/231015_sleepstage_hypnogram.png",
+      "date" : "2023-09-10",
+    },
+    {
+      "image" : "assets/result/231016_sleepstage_hypnogram.png",
+      "date" : "2023-10-01",
+    }
+  ];
+
   // 달력 이벤트
-  final _events = LinkedHashMap(
-    equals: isSameDay,
-  )..addAll({
-    DateTime(2022, 8, 4) : Event(date: DateTime(2022, 8, 4)),
-    DateTime(2022, 8, 6) : Event(date: DateTime(2022, 8, 6)),
-    DateTime(2022, 8, 7) : Event(date: DateTime(2022, 8, 7)),
-    DateTime(2022, 8, 9) : Event(date: DateTime(2022, 8, 9)),
-    DateTime(2022, 8, 11) : Event(date: DateTime(2022, 8, 11)),
-    DateTime(2022, 8, 14) : Event(date: DateTime(2022, 8, 14)),
-  }) ;
+
+  Map<DateTime, List<Event>> events = {
+    DateTime.utc(2023,9,10) : [ Event('title'), Event('title2') ],
+    DateTime.utc(2023,10,1) : [ Event('title3') ],
+  };
+
+  List<Event> _getEventsForDay(DateTime day) {
+    return events[day] ?? [];
+  }
+
+
+  String _getImageForSelectedDate(DateTime selectedDate) {
+    final formattedDate = "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
+    final matchingItems = itemList.where((item) => item['date'] == formattedDate).toList();
+    if (matchingItems.isNotEmpty) {
+      return matchingItems[0]['image'];
+    } else {
+      return "";
+    }
+  }
+
+  List<String> _getImagesForSelectedDate(DateTime selectedDate) {
+    final formattedDate = selectedDate.toString().split(" ")[0];
+    final matchingItems = itemList.where((item) => item['date'] == formattedDate).toList();
+    if (matchingItems.isNotEmpty) {
+      return matchingItems.map<String>((item) => item['image'] as String).toList();
+    } else {
+      return [];
+    }
+  }
+
 
   // 토근 버튼 변수들
   String result = '';
@@ -92,7 +144,8 @@ class _SleepInfo extends ConsumerState<SleepInfo> {
     super.dispose();
   }
 
-  Future<void> startRecording() async {
+  // 녹음 기닁 함수들
+  Future<void> startRecording() async {  // 녹음 시작
     try{
       if (await audioRecord.hasPermission()){
         viewTxt = '녹음 중';
@@ -107,7 +160,7 @@ class _SleepInfo extends ConsumerState<SleepInfo> {
     }
   }
 
-  Future<void> stopRecording() async {
+  Future<void> stopRecording() async {  // 녹음 중단
     try{
       String? path = await audioRecord.stop();
       setState(() {
@@ -121,7 +174,7 @@ class _SleepInfo extends ConsumerState<SleepInfo> {
     }
   }
 
-  Future<void> playRecording() async {
+  Future<void> playRecording() async {  // 파일 재생
     try{
       Source urlSource = UrlSource(audioPath);
       await audioPlayer.play(urlSource);
@@ -139,7 +192,7 @@ class _SleepInfo extends ConsumerState<SleepInfo> {
     }
   }
 
-  Future<void> stopplayRecording() async {
+  Future<void> stopplayRecording() async {  // 파일 중지
     try{
       setState(() {
         isPlaying = false;
@@ -149,7 +202,6 @@ class _SleepInfo extends ConsumerState<SleepInfo> {
       print('Error Start Recording: $e');
     }
   }
-
 
 
 
@@ -168,124 +220,159 @@ class _SleepInfo extends ConsumerState<SleepInfo> {
               child: ListView(
                 children: [
                   Container(
+                    margin: EdgeInsets.all(10),
                     // 달력
                     child: TableCalendar(
                       locale: 'ko_KR',
                       firstDay: DateTime.utc(2022, 9, 16),
                       lastDay: DateTime.utc(2030, 3, 14),
                       focusedDay: _now,
+                      calendarFormat: format,
+                      // 포맷 변경
+                      onFormatChanged: (CalendarFormat format) {
+                        setState(() {
+                          this.format = format;
+                        });
+                      },
+                      calendarStyle: CalendarStyle(
+                        markerSize: 10.0,
+                        markerDecoration: BoxDecoration(
+                            color: Colors.blueAccent,
+                            shape: BoxShape.circle
+                        ),
 
-                      // 이벤트 처리 만들기
-                      // selectedDayPredicate: (day) {
-                      //   // Use `selectedDayPredicate` to determine which day is currently selected.
-                      //   // If this returns true, then `day` will be marked as selected.
-                      //
-                      //   // Using `isSameDay` is recommended to disregard
-                      //   // the time-part of compared DateTime objects.
-                      //   return isSameDay(_selectedDay, day);
-                      // },
-                      // onDaySelected: (selectedDay, focusedDay) {
-                      //   if (!isSameDay(_selectedDay, selectedDay)) {
-                      //     // Call `setState()` when updating the selected day
-                      //     setState(() {
-                      //       _selectedDay = selectedDay;
-                      //       _now = focusedDay;
-                      //     });
-                      //   }
-                      // },
-                      // onFormatChanged: (format) {
-                      //   if (_calendarFormat != format) {
-                      //     // Call `setState()` when updating calendar format
-                      //     setState(() {
-                      //       _calendarFormat = format;
-                      //     });
-                      //   }
-                      // },
-                      // onPageChanged: (focusedDay) {
-                      //   // No need to call `setState()` here
-                      //   _now = focusedDay;
-                      // },
-                      // calendarBuilders: CalendarBuilders(
-                      //   dowBuilder: (context, day) {
-                      //     return Center(child: Text(days[day.weekday])) ;
-                      //   },
-                      //   markerBuilder: (context, date, events) {
-                      //     DateTime _date = DateTime(date.year, date.month, date.day);
-                      //     if ( isSameDay(_date, _events[_date] )) {
-                      //       return Container(
-                      //         width: MediaQuery.of(context).size.width * 0.11,
-                      //         padding: const EdgeInsets.only(bottom: 5),
-                      //         decoration: const BoxDecoration(
-                      //           color: Colors.lightBlue,
-                      //           shape: BoxShape.circle,
-                      //         ),
-                      //       );
-                      //     }
-                      //   },
-                      // ),
+                        // tableBorder: const TableBorder(
+                        //   // top : BorderSide(color: Colors.grey),
+                        //   // right : BorderSide(color: Colors.grey),
+                        //   bottom : BorderSide(color: Colors.grey),
+                        //   // left : BorderSide(color: Colors.grey),
+                        // ),
+                      ),
+                      eventLoader: _getEventsForDay,
+
+                      // 누른 날짜 맞는지 확인
+                     selectedDayPredicate: (day) {
+                        return isSameDay(_selectedDay, day);
+                      },
+
+                      // 지금 누른 날짜 표시
+                      onDaySelected: (selectedDay, focusedDay) {
+                        if (!isSameDay(_selectedDay, selectedDay)) {
+                          // Call `setState()` when updating the selected day
+                          setState(() {
+                            _selectedDay = selectedDay;
+                            _now = focusedDay;
+                            _selectedImage = _getImageForSelectedDate(selectedDay);
+                          });
+                        }
+                      },
+
+                      onPageChanged: (focusedDay) {
+                        setState(() {
+                          if(focusedDay.month == DateTime.now().month) {
+                            _selectedDay = DateTime.now();
+                            _now = DateTime.now();
+                          } else {
+                            _selectedDay = focusedDay;
+                            _now = focusedDay;
+                          }
+
+                          _selectedImage = _getImageForSelectedDate(_selectedDay!);
+                        });
+                      },
                     ),
                   ),
 
                   // 버튼
                   Column(
                     children: [
-                      ToggleButtons(
-                        children: [
-                          Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16),
-                              child: Text('수면', style: TextStyle(fontSize: 15))),
-                          Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16),
-                              child: Text('녹음', style: TextStyle(fontSize: 15))),
-                        ],
-                        isSelected: isSelected,
-                        onPressed: toggleSelect,
-                      ),
-                      if (isVisual == true)
-                        Image.asset('assets/result/231016_sleepstage_hypnogram.png',
-                          width: 400,
-                          height: 200,)
-
-                      else
-                        Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Text(
-                                viewTxt,
-                                style: Theme.of(context).textTheme.headline4,
-                              ),
-                              Container(
-                                margin: EdgeInsets.all(20.0),
-                                child: FloatingActionButton(
-                                  backgroundColor: Colors.blueAccent,
-                                  onPressed: isRecording ? stopRecording : startRecording,
-                                  tooltip: 'Increment',
-                                  child: Icon(
-                                      isRecording ? Icons.stop : Icons.play_arrow,
-                                  color: Colors.white),
-                                ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.all(20.0),
-                                decoration: BoxDecoration(
-                                    border: Border.all(width: 2.0, color: Colors.grey),
-                                    borderRadius: BorderRadius.circular(15.0)
-                                ),
-                                child: Column(
-                                  children: <Widget>[
-                                    Text('${DateFormat('y-MM-dd').format(_now)}'),
-                                    IconButton(
-                                      icon: isPlaying ? Icon(Icons.stop) : Icon(Icons.play_circle_filled),
-                                      onPressed: isPlaying? stopplayRecording : playRecording
-                                    ),
-                                  ],
-                                ),
-                              )
-
-                            ],
-                          ),
+                      Container(
+                        margin: EdgeInsets.only(top: 10, bottom: 10),
+                        child: ToggleButtons(
+                          children: [
+                            Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                child: Text('수면', style: TextStyle(fontSize: 15))),
+                            Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                child: Text('녹음', style: TextStyle(fontSize: 15))),
+                          ],
+                          isSelected: isSelected,
+                          onPressed: toggleSelect,
                         ),
+                      ),
+                      // 선택할때 다이어리 미리 보기 뜨는 곳.
+                    if (isVisual == true)
+                      if (_selectedImage.isNotEmpty)
+                        Column(
+                          children: [
+                            Image.asset('assets/result/231016_sleepstage_hypnogram.png',
+                              width: 400,
+                              height: 200,),
+                            Container(
+                                margin: EdgeInsets.only(top: 15, left: 15, bottom: 25),
+                                child: Center(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('수면 단계', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),),
+                                      Text('R (REM): 렘 수면 / 꿈 수면', style: TextStyle(fontSize: 18),),
+                                      Text('Deep Sleep: 깊은 수면', style: TextStyle(fontSize: 18),),
+                                      Text('Ligth Sleep: 얕은 수면', style: TextStyle(fontSize: 18),),
+                                      Text('W (Wake): 깨어있는 상태', style: TextStyle(fontSize: 18),)
+                                    ],
+                                  )
+                              )
+                            ),
+                        ],
+                        )
+                      else
+                        Text('내역이 존재하지 않습니다.')
+
+                    else
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Container(
+                              margin: EdgeInsets.all(20.0),
+                              child: FloatingActionButton(
+                                backgroundColor: Colors.blueAccent,
+                                onPressed: isRecording ? stopRecording : startRecording,
+                                tooltip: 'Increment',
+                                child: Icon(
+                                    isRecording ? Icons.stop : Icons.play_arrow,
+                                color: Colors.white),
+                              ),
+                            ),
+                            if (isRecording)
+                              Container(
+                                margin: EdgeInsets.only(top: 5, bottom: 10), // 위쪽 여백
+                                child: Text(
+                                  viewTxt,
+                                  style: Theme.of(context).textTheme.headline6,),
+                              ),
+                            Container(
+                              padding: EdgeInsets.all(20.0),
+                              decoration: BoxDecoration(
+                                  border: Border.all(width: 2.0, color: Colors.grey),
+                                  borderRadius: BorderRadius.circular(15.0)
+                              ),
+                              child: Column(
+                                children: <Widget>[
+                                  Text('${DateFormat('y-MM-dd').format(_now)}'),
+                                  IconButton(
+                                    icon: isPlaying ? Icon(Icons.stop) : Icon(Icons.play_circle_filled),
+                                    onPressed: isPlaying? stopplayRecording : playRecording
+                                  ),
+                                ],
+                              ),
+                            )
+
+                          ],
+                        ),
+                      )
+
                     ],
                   ),
                 ],
@@ -311,148 +398,4 @@ class _SleepInfo extends ConsumerState<SleepInfo> {
   }
 }
 
-  // 녹음 기능 함수들
-//   Future<void> _recodeFunc() async{
-//     PermissionStatus status = await Permission.microphone.status;
-//     if (status != PermissionStatus.granted) throw RecordingPermissionException("Microphone permission not granted");
-//     setState(() {
-//       viewTxt = "Recoding ~";
-//       print("check 변수 값: $check");
-//     });
-//     if(!check){
-//       Directory tempDir = await getTemporaryDirectory();
-//       File outputFile = File('${tempDir.path}/flutter_sound-tmp.aacADTS');
-//       await myRecorder?.startRecorder(toFile: outputFile.path,codec: Codec.aacADTS);
-//       print("START");
-//       setState(() {
-//         check = !check;
-//       });
-//       return;
-//     }
-//
-//     print("STOP");
-//     setState(() {
-//       check = !check;
-//       viewTxt = "await...";
-//     });
-//     await myRecorder?.stopRecorder();
-//     return;
-//   }
-//
-//   Future<void> playMyFile() async{
-//     if(!playCheck){
-//       Directory tempDir = await getTemporaryDirectory();
-//       File inFile = File('${tempDir.path}/flutter_sound-tmp.aacADTS');
-//       try{
-//         Uint8List dataBuffer = await inFile.readAsBytes();
-//         print("dataBuffer $dataBuffer");
-//         setState(() {
-//           playCheck = !playCheck;
-//         });
-//         await this.myPlayer?.startPlayer(
-//             fromDataBuffer: dataBuffer,
-//             codec: Codec.aacADTS,
-//             whenFinished: () {
-//               print('Play finished');
-//               setState(() {});
-//             });
-//       }
-//       catch(e){
-//         print(" NO Data");
-//         // 기존 _key.currentState?
-//         ScaffoldMessenger.of(context).showSnackBar(
-//             SnackBar(
-//               content: Text("NO DATA!!!!!!"),
-//             )
-//         );
-//       }
-//       return;
-//     }
-//     await myPlayer?.stopPlayer();
-//     setState(() {
-//       playCheck = !playCheck;
-//     });
-//     print("PLAY STOP!!");
-//     return;
-//   }
-//
-// }
 
-// class Calendar extends StatelessWidget {
-  // Calendar({super.key});
-  // @override
-  // Widget build(BuildContext context) {
-  //   return TableCalendar(
-  //     locale: 'en_US',
-  //     events: _selectedDay,
-  //     initialCalendarFormat: CalendarFormat.month,
-  //     formatAnimation: FormatAnimation.slide,
-  //     startingDayOfWeek: StartingDayOfWeek.sunday,
-  //     availableGestures: AvailableGestures.none,
-  //     availableCalendarFormats: const {
-  //       CalendarFormat.month: 'Month',
-  //     },
-  //     calendarStyle: CalendarStyle(
-  //       weekdayStyle: TextStyle(color: Colors.white),
-  //       weekendStyle: TextStyle(color: Colors.white),
-  //       outsideStyle: TextStyle(color: Colors.grey),
-  //       unavailableStyle: TextStyle(color: Colors.grey),
-  //       outsideWeekendStyle: TextStyle(color: Colors.grey),
-  //     ),
-  //     daysOfWeekStyle: DaysOfWeekStyle(
-  //       dowTextBuilder: (date, locale) {
-  //         return DateFormat.E(locale)
-  //             .format(date)
-  //             .substring(0, 3)
-  //             .toUpperCase();
-  //       },
-  //       weekdayStyle: TextStyle(color: Colors.grey),
-  //       weekendStyle: TextStyle(color: Colors.grey),
-  //     ),
-  //     headerVisible: false,
-  //     builders: CalendarBuilders(
-  //       markersBuilder: (context, date, events, holidays) {
-  //         return [
-  //           Container(
-  //             decoration: new BoxDecoration(
-  //               color: Color(0xFF30A9B2),
-  //               shape: BoxShape.circle,
-  //             ),
-  //             margin: const EdgeInsets.all(4.0),
-  //             width: 4,
-  //             height: 4,
-  //           )
-  //         ];
-  //       },
-  //       selectedDayBuilder: (context, date, _) {
-  //         return Container(
-  //           decoration: new BoxDecoration(
-  //             color: Color(0xFF30A9B2),
-  //             shape: BoxShape.circle,
-  //           ),
-  //           margin: const EdgeInsets.all(4.0),
-  //           width: 100,
-  //           height: 100,
-  //           child: Center(
-  //             child: Text(
-  //               '${date.day}',
-  //               style: TextStyle(
-  //                 fontSize: 16.0,
-  //                 color: Colors.white,
-  //               ),
-  //             ),
-  //           ),
-  //         );
-  //       },
-  //     ), firstDay: null, focusedDay: null, lastDay: null,
-  //   );
-  // }
-
-  // final Map<DateTime, List> _selectedDay = {
-  //   DateTime(2019, 4, 3): ['Selected Day in the calendar!'],
-  //   DateTime(2019, 4, 5): ['Selected Day in the calendar!'],
-  //   DateTime(2019, 4, 22): ['Selected Day in the calendar!'],
-  //   DateTime(2019, 4, 24): ['Selected Day in the calendar!'],
-  //   DateTime(2019, 4, 26): ['Selected Day in the calendar!'],
-  // };
-// }

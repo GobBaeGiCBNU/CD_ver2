@@ -72,6 +72,7 @@ dependencies:
   flutter_sound: ^9.2.13
   record: ^4.4.4
   audioplayers: ^5.2.0
+  logger: ^1.4.0
 
 dev_dependencies:
   flutter_test:

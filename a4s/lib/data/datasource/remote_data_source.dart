@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart';
+import 'package:logger/logger.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class remoteDataSource {
   ///네트워크 연결 확인
@@ -86,14 +88,7 @@ class AuthDataSource extends remoteDataSource {
   ///로그아웃
   ///로컬에 저장된 카카오 로그인 정보와 파이버베이스 로그인 정보 삭제
   Future<void> signOut() async {
-    try {
-      // try {
-      //   await Kakao.UserApi.instance.logout();
-      // } catch (e) {}
       await FirebaseAuth.instance.signOut();
-    } catch (e) {
-      print(e);
-    }
   }
 
   ///이메일 회원가입
@@ -145,6 +140,29 @@ class AuthDataSource extends remoteDataSource {
 
 ///인증정보를 제외한 유저 정보에 관련된 외부데이터소스
 class UserInfoDataSource {
+  Future<bool> setMySleepInfo({
+    required String uid,
+    required String gender,
+    required String height,
+    required String weight,
+    required String disease,
+  }) async {
+    try {
+      final db = FirebaseFirestore.instance;
+      await db.collection("users").doc(uid).set({
+        "id": uid,
+        "gender": gender,
+        "height": height,
+        "weight": weight,
+        "disease": disease
+      });
+    } catch (e) {
+      print("회원 수면 정보 업데이트 오류 (remote_data_source)");
+      return false;
+    }
+    return true;
+  }
+
   ///응원팀 생성 및 업데이트
   Future<bool> updateMySleepInfo({
     required String uid,

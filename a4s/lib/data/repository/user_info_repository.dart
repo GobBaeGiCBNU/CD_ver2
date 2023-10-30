@@ -12,6 +12,21 @@ class UserInfoRepository {
     return await _userInfoDataSource.getMyInfo(uid: uid);
   }
 
+  Future<bool> setMySleepInfo({
+    required String uid,
+    required String gender,
+    required String height,
+    required String weight,
+    required String disease,
+  }) async {
+    return await _userInfoDataSource.setMySleepInfo(
+        uid: uid,
+        gender: gender,
+        height: height,
+        weight: weight,
+        disease: disease);
+  }
+
   Future<bool> updateMySleepInfo({
     required String uid,
     required String gender,

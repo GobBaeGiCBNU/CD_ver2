@@ -205,13 +205,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 MaterialPageRoute(
                                     builder: (context) =>
                                         SignUpPage2_Google()));
-                          } else {
-                            Navigator.pop(context);
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        AlarmObserver(child: MainPage())));
                           }
                         } catch (e) {
                           setState(() {

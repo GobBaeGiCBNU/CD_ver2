@@ -185,6 +185,12 @@ class _AlarmCard extends StatelessWidget {
           );
         }
       }
+      if (wakeTime.hour > 12) {
+        wakeTime = TimeOfDay(
+          hour: wakeTime.hour - 12,
+          minute: wakeTime.minute,
+        );
+      }
       break;
     case "1시간":
       wakeTime = TimeOfDay(
@@ -197,7 +203,7 @@ class _AlarmCard extends StatelessWidget {
           minute: wakeTime.minute,
         );
       }
-      else if (wakeTime.hour > 12) {
+      if (wakeTime.hour > 12) {
         wakeTime = TimeOfDay(
           hour: wakeTime.hour - 12,
           minute: wakeTime.minute,
@@ -221,6 +227,12 @@ class _AlarmCard extends StatelessWidget {
           );
         }
       }
+      if (wakeTime.hour > 12) {
+        wakeTime = TimeOfDay(
+          hour: wakeTime.hour - 12,
+          minute: wakeTime.minute,
+        );
+      }
       break;
     case "2시간":
       wakeTime = TimeOfDay(
@@ -230,6 +242,12 @@ class _AlarmCard extends StatelessWidget {
       if (wakeTime.hour < 0) {
         wakeTime = TimeOfDay(
           hour: wakeTime.hour + 24,
+          minute: wakeTime.minute,
+        );
+      }
+      if (wakeTime.hour > 12) {
+        wakeTime = TimeOfDay(
+          hour: wakeTime.hour - 12,
           minute: wakeTime.minute,
         );
       }

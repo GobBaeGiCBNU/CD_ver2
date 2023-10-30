@@ -43,7 +43,7 @@ class UserViewModel extends ChangeNotifier {
         .then((result) {
       _user = result;
       _user!.name = name;
-      userInfoRepositoryProvider.updateMySleepInfo(
+      userInfoRepositoryProvider.setMySleepInfo(
           uid: _user!.uid!,
           gender: gender,
           height: height,
@@ -54,6 +54,7 @@ class UserViewModel extends ChangeNotifier {
       _user!.gender = gender;
       _user!.disease = disease;
       notifyListeners();
+      print("${_user!.uid}");
     });
   }
 

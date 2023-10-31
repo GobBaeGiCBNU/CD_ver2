@@ -14,7 +14,6 @@ class SignUpPage2_Google extends ConsumerStatefulWidget {
 
 class _SignUpPageState extends ConsumerState<SignUpPage2_Google> {
   TextStyle style = TextStyle(fontFamily: 'NanumSquare', fontSize: 18.0);
-  late TextEditingController _name;
   late TextEditingController _gender;
   late TextEditingController _weight;
   late TextEditingController _height;
@@ -38,7 +37,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage2_Google> {
   @override
   void initState() {
     super.initState();
-    _name = TextEditingController(text: '${Get.arguments['name']}');
     _gender = TextEditingController(text: "");
     _weight = TextEditingController(text: "");
     _height = TextEditingController(text: "");
@@ -48,7 +46,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage2_Google> {
 
   @override
   void dispose() {
-    _name.dispose();
     _gender.dispose();
     _weight.dispose();
     _height.dispose();
@@ -102,25 +99,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage2_Google> {
               Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 20.0, horizontal: 30),
-                child: TextFormField(
-                  controller: _name,
-                  validator: (value) => (value!.isEmpty) ? "이름을 입력해 주세요" : null,
-                  style: style,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.person),
-                    labelText: "이름",
-                    filled: true,
-                    fillColor: Color(0xffF6F6F6),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 20.0, horizontal: 30),
                 child: DropDownTextField(
                     validator: (value) =>
                         (_cnt.dropDownValue == null) ? "성별을 선택해 주세요" : null,
@@ -149,6 +127,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage2_Google> {
                   controller: _height,
                   validator: (value) => (value!.isEmpty) ? "키를 입력 해 주세요" : null,
                   style: style,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.height),
                     labelText: "키",
@@ -169,6 +148,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage2_Google> {
                   validator: (value) =>
                       (value!.isEmpty) ? "몸무게를 입력 해 주세요" : null,
                   style: style,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.line_weight),
                     labelText: "몸무게",
@@ -216,10 +196,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage2_Google> {
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       try {
-                        await user.emailSignUp(
-                            email: "${Get.arguments['email']}",
-                            password: "${Get.arguments['password']}",
-                            name: "${Get.arguments['name']}",
+                        await user.setSleepInfo(
                             gender: _cnt.dropDownValue!.value,
                             height: _height.value.text,
                             weight: _weight.value.text,

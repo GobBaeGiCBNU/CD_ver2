@@ -16,18 +16,19 @@ class UserViewModel extends ChangeNotifier {
 
   bool get isAuthenticated => _user != null;
 
-  // Future<void> GoogleSignIn() {
-  //   return authRepositoryProvider.GoogleSignIn().then((result) async {
-  //     _user = result;
-  //     try {
-  //       _user!.gender =
-  //           await userInfoRepositoryProvider.getMyTeam(uid: _user!.uid!);
-  //     } catch (e) {
-  //       //처음 카카오 로그인
-  //     }
-  //     notifyListeners();
-  //   });
-  // }
+  Future<void> GoogleSignIn() {
+    return authRepositoryProvider.GoogleSignIn().then((result) async {
+      _user = result;
+      try {
+        final userinfo =
+            await userInfoRepositoryProvider.getMyInfo(uid: _user!.uid!);
+        _user!.gender = userinfo["gender"];
+      } catch (e) {
+        //처음 카카오 로그인
+      }
+      notifyListeners();
+    });
+  }
 
   Future<void> emailSignUp({
     required String email,
@@ -54,7 +55,6 @@ class UserViewModel extends ChangeNotifier {
       _user!.gender = gender;
       _user!.disease = disease;
       notifyListeners();
-      print("${_user!.uid}");
     });
   }
 
@@ -66,7 +66,9 @@ class UserViewModel extends ChangeNotifier {
     )
         .then((result) async {
       _user = result;
-      await userInfoRepositoryProvider.getMyInfo(uid: _user!.uid!).then((value) {
+      await userInfoRepositoryProvider
+          .getMyInfo(uid: _user!.uid!)
+          .then((value) {
         _user!.weight = value["weight"];
         _user!.height = value["height"];
         _user!.gender = value["gender"];
@@ -78,8 +80,25 @@ class UserViewModel extends ChangeNotifier {
     });
   }
 
+  Future<void> setSleepInfo({
+    required String gender,
+    required String height,
+    required String weight,
+    required String disease,
+  }) async {
+    return await userInfoRepositoryProvider
+        .setMySleepInfo(
+            uid: _user!.uid!,
+            gender: gender,
+            height: height,
+            weight: weight,
+            disease: disease)
+        .then((result) {
+      notifyListeners();
+    });
+  }
+
   Future<void> updateSleepInfo({
-    required String uid,
     required String gender,
     required String height,
     required String weight,

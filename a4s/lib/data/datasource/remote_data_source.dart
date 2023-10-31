@@ -16,79 +16,35 @@ class remoteDataSource {
   }
 }
 
+final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: [
+  "https://www.googleapis.com/auth/user.emails.read",
+  "https://www.googleapis.com/auth/user.name.read",
+], forceCodeForRefreshToken: true);
+
 ///인증에 관련된 외부데이터소스
 class AuthDataSource extends remoteDataSource {
-  // ///카카오를 통한 간편로그인
-  // Future<User> GoogleSignIn() async {
-  //   if (!await checkNetwork()) {
-  //     throw Exception("인터넷 연결 없음");
-  //   }
-  //   try {
-  //     //이미 존재하는 연결된 카카오 계정이 있는지 확인
-  //     Kakao.User user = await Kakao.UserApi.instance.me();
-  //   } catch (e) {
-  //     //연결된 카카오 계정이 없다면 카카오 로그인
-  //     if (e is Kakao.KakaoClientException) {
-  //       print("카카오 로그인 필요");
-  //       // 카카오톡 실행 가능 여부 확인
-  //       // 카카오톡 실행이 가능하면 카카오톡으로 로그인, 아니면 카카오계정으로 로그인
-  //       if (await Kakao.isKakaoTalkInstalled()) {
-  //         try {
-  //           await Kakao.UserApi.instance.loginWithKakaoTalk(); //카톡으로 로그인
-  //           print('카카오톡으로 로그인 성공 1');
-  //         } catch (error) {
-  //           print('카카오톡으로 로그인 실패 1 $error');
-
-  //           // 사용자가 카카오톡 설치 후 디바이스 권한 요청 화면에서 로그인을 취소한 경우,
-  //           // 의도적인 로그인 취소로 보고 카카오계정으로 로그인 시도 없이 로그인 취소로 처리 (예: 뒤로 가기)
-  //           // if (error is PlatformException && error.code == 'CANCELED') {
-  //           //   return;
-  //           // }
-  //           // 카카오톡에 연결된 카카오계정이 없는 경우, 카카오계정으로 로그인
-  //           try {
-  //             await Kakao.UserApi.instance.loginWithKakaoAccount();
-  //             print('카카오계정으로 로그인 성공 2');
-  //           } catch (error) {
-  //             print('카카오계정으로 로그인 실패 2 $error');
-  //             throw Exception("카카오 인증 실패");
-  //           }
-  //         }
-  //       } else {
-  //         try {
-  //           await Kakao.UserApi.instance.loginWithKakaoAccount();
-  //           print('카카오계정으로 로그인 성공 3');
-  //         } catch (error) {
-  //           print('카카오계정으로 로그인 실패 3 $error');
-  //           throw Exception("카카오 인증 실패");
-  //         }
-  //       }
-  //     } else {
-  //       print('$e');
-  //       throw Exception("카카오 인증 실패");
-  //     }
-  //   }
-  //   Kakao.User user = await Kakao.UserApi.instance.me();
-
-  // //파이어베이스에 카카오 인증 uid를 통해 계정 생성
-  // var response =
-  //     await get(Uri.http('localhost:8000', '/', {'id': user.id.toString()}));
-  // var responseBody = response.body;
-  // final userCredential = await FirebaseAuth.instance
-  //     .signInWithCustomToken(responseBody.toString());
-  // final realUser = userCredential.user;
-  // //첫 카카오를 통한 로그인이라면 파이어베이스 계정 정보 초기화
-  // if (realUser?.displayName == null && realUser?.photoURL == null) {
-  //   await realUser?.updateDisplayName(user.kakaoAccount!.profile!.nickname);
-  //   await realUser
-  //       ?.updatePhotoURL(user.kakaoAccount!.profile!.profileImageUrl);
-  // }
-  // return realUser!;
-  // }
+  ///카카오를 통한 간편로그인
+  Future<User> GoogleSignIn() async {
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser!.authentication;
+    final AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+    final UserCredential awitAsult =
+        await FirebaseAuth.instance.signInWithCredential(credential);
+    final User? user = awitAsult.user;
+    if (user?.displayName == null) {  
+      await user?.updateDisplayName(googleUser.displayName);
+    }
+    return user!;
+  }
 
   ///로그아웃
   ///로컬에 저장된 카카오 로그인 정보와 파이버베이스 로그인 정보 삭제
   Future<void> signOut() async {
-      await FirebaseAuth.instance.signOut();
+    await FirebaseAuth.instance.signOut();
   }
 
   ///이메일 회원가입
@@ -188,15 +144,11 @@ class UserInfoDataSource {
   }
 
   // 알람 울리는 시간 정보 설정
-  Future<bool> updateMyTimeInfo({
-    required String uid,
-    required String waketime
-  }) async {
+  Future<bool> updateMyTimeInfo(
+      {required String uid, required String waketime}) async {
     try {
       final db = FirebaseFirestore.instance;
-      await db.collection("users").doc(uid).update({
-        "waketime": waketime
-      });
+      await db.collection("users").doc(uid).update({"waketime": waketime});
     } catch (e) {
       print("회원 기상 정보 업데이트 오류 (remote_data_source)");
       return false;
@@ -204,7 +156,7 @@ class UserInfoDataSource {
     return true;
   }
 
-  ///응원팀 조회
+  ///유저 정보 조회
   Future<Map> getMyInfo({required String uid}) async {
     final db = FirebaseFirestore.instance;
     DocumentSnapshot teamDoc = await db.collection("users").doc(uid).get();

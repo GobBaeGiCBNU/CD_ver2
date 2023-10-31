@@ -1,15 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:a4s/data/model/app_user.dart';
 import 'package:a4s/data/datasource/remote_data_source.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 final authRepositoryProvider = AuthRepository();
 
 class AuthRepository {
   late final AuthDataSource _authDataSource = AuthDataSource();
 
-  // Future<AppUser> GoogleSignIn() async {
-  //   return AppUser.fromUser(await _authDataSource.GoogleSignIn());
-  // }
+  Future<AppUser> GoogleSignIn() async {
+    return AppUser.fromUser(await _authDataSource.GoogleSignIn());
+  }
 
   Future<void> signOut() async {
     await _authDataSource.signOut();

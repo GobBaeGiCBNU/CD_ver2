@@ -34,9 +34,7 @@ const blogList = [
       "서울아산병원"),
 ];
 
-
-class _TherapyInfo extends State<TherapyInfo>{
-
+class _TherapyInfo extends State<TherapyInfo> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -45,11 +43,30 @@ class _TherapyInfo extends State<TherapyInfo>{
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            margin: EdgeInsets.only(bottom: 10, left: 10),
-            child: Text(
-              "나를 위한 수면 정보",
-              style: TextStyle(fontSize: 25),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              height: 60,
+              child: Row(
+                children: [
+                  IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        size: 15,
+                      )),
+                  Container(
+                    margin: EdgeInsets.only(bottom: 10, left: 10),
+                    child: Text('나를 위한 수면 정보',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w600)),
+                  ),
+                ],
+              ),
             ),
           ),
           Expanded(
@@ -83,7 +100,7 @@ class _TherapyInfo extends State<TherapyInfo>{
                                       padding: EdgeInsets.only(left: 15),
                                       child: Column(
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Container(
                                             margin: EdgeInsets.only(top: 12),
@@ -107,16 +124,13 @@ class _TherapyInfo extends State<TherapyInfo>{
                                   )
                                 ],
                               ),
-                            )
-                        ),
+                            )),
                         Divider(),
                       ],
                     );
-                  })
-          ),
+                  })),
         ],
       ),
     );
   }
 }
-

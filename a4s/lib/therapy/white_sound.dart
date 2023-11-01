@@ -34,9 +34,7 @@ const soundList = [
       "Youtube"),
 ];
 
-
-class _WhiteSound extends State<WhiteSound>{
-
+class _WhiteSound extends State<WhiteSound> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -45,11 +43,30 @@ class _WhiteSound extends State<WhiteSound>{
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            margin: EdgeInsets.only(bottom: 10, left: 10),
-            child: Text(
-              "좋은 수면을 위한 백색소음",
-              style: TextStyle(fontSize: 25),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              height: 60,
+              child: Row(
+                children: [
+                  IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        size: 15,
+                      )),
+                  Container(
+                    margin: EdgeInsets.only(bottom: 10, left: 10),
+                    child: Text('좋은 수면을 위한 백색소음',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w600)),
+                  ),
+                ],
+              ),
             ),
           ),
           Expanded(
@@ -83,7 +100,7 @@ class _WhiteSound extends State<WhiteSound>{
                                       padding: EdgeInsets.only(left: 15),
                                       child: Column(
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Container(
                                             margin: EdgeInsets.only(top: 12),
@@ -107,16 +124,13 @@ class _WhiteSound extends State<WhiteSound>{
                                   )
                                 ],
                               ),
-                            )
-                        ),
+                            )),
                         Divider(),
                       ],
                     );
-                  })
-          ),
+                  })),
         ],
       ),
     );
   }
 }
-

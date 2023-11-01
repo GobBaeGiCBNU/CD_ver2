@@ -21,7 +21,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage3> {
   Future<bool> requestPermission() async {
     // 권한 요청
     Map<Permission, PermissionStatus> statues =
-        await [Permission.microphone, Permission.sensors, Permission.systemAlertWindow].request();
+        await [Permission.microphone, Permission.sensors].request();
+        /////////////여기 위에 저런 형식으로 넣어 지인아 ///////////////////
     print('per1 : $statues');
     // 결과 확인
     if (!statues.values.every((element) => element.isGranted)) {

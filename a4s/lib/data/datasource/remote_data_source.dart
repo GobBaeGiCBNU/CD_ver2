@@ -16,10 +16,7 @@ class remoteDataSource {
   }
 }
 
-final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: [
-  "https://www.googleapis.com/auth/user.emails.read",
-  "https://www.googleapis.com/auth/user.name.read",
-], forceCodeForRefreshToken: true);
+final GoogleSignIn _googleSignIn = GoogleSignIn();
 
 ///인증에 관련된 외부데이터소스
 class AuthDataSource extends remoteDataSource {
@@ -35,10 +32,20 @@ class AuthDataSource extends remoteDataSource {
     final UserCredential awitAsult =
         await FirebaseAuth.instance.signInWithCredential(credential);
     final User? user = awitAsult.user;
-    if (user?.displayName == null) {  
+
+    print("로그인 진입------------------------------");
+
+    assert(!user!.isAnonymous);
+    assert(await user!.getIdToken() != null);
+
+    final User currentUser = await FirebaseAuth.instance.currentUser!;
+    assert(user!.uid == currentUser.uid);
+
+    if (user?.displayName == null) {
       await user?.updateDisplayName(googleUser.displayName);
     }
-    return user!;
+    print("로그인 성공 ${user!.displayName}");
+    return user;
   }
 
   ///로그아웃

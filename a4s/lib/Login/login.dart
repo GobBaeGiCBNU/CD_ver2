@@ -247,7 +247,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         "Google로 간편 로그인",
                         style: TextStyle(color: Colors.black, fontSize: 18),
                       ),
-                    ),
+                    ),  
                   ),
                 ),
                 SizedBox(height: 20),

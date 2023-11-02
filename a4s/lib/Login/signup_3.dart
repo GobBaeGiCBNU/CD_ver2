@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:a4s/data/view/user_view_model.dart';
 import 'package:get/get.dart';
 import 'package:health/health.dart';
+import 'package:a4s/notification.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:permission_handler_platform_interface/permission_handler_platform_interface.dart';
 
@@ -21,8 +22,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage3> {
   Future<bool> requestPermission() async {
     // 권한 요청
     Map<Permission, PermissionStatus> statues =
-        await [Permission.microphone, Permission.sensors].request();
+        await [Permission.microphone, Permission.sensors, Permission.notification].request();
         /////////////여기 위에 저런 형식으로 넣어 지인아 ///////////////////
+
     print('per1 : $statues');
     // 결과 확인
     if (!statues.values.every((element) => element.isGranted)) {
